@@ -1,4 +1,4 @@
-import { Text, StyleSheet, FlatList, SafeAreaView, View, Image } from 'react-native';
+import { Text, StyleSheet, Pressable, SafeAreaView, View, Image } from 'react-native';
 import { GlobalStyles } from '../../styles/shared.styles'
 
 const ACTIVITY_DATA = [
@@ -43,33 +43,37 @@ const CHILD_DATA = {
     }
   }
 
-export default function ChildActivityScreen() {
+export default function ChildActivityScreen({navigation}) {
   return (
-    <SafeAreaView style={GlobalStyles.main}>
+    <View style={GlobalStyles.main}>
       <View style={GlobalStyles.container}>
         <View style={styles.header}>
             <Image
-                style={styles.headerAvatar}
-                source={{uri: CHILD_DATA.avatar}}
+              style={styles.headerAvatar}
+              source={{uri: CHILD_DATA.avatar}}
             /> 
             <Text>{CHILD_DATA.fullName}</Text>
         </View>
       </View>
 
-
-    </SafeAreaView>
+      <View>
+        <Pressable onPress={navigation.navigate('Report Absence')}> 
+          Report absence or sickness
+        </Pressable>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-    header: {
-        display: 'flex',
-        alignItems: 'center', 
-    },
+  header: {
+    display: 'flex',
+    alignItems: 'center', 
+  },
 
-    headerAvatar: {
-        width: 100,
-        height: 100,
-        borderRadius: '50%',
-    }
+  headerAvatar: {
+    width: 100,
+    height: 100,
+    borderRadius: '50%',
+  }
 })

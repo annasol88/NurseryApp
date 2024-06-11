@@ -111,6 +111,6 @@ const styles = StyleSheet.create({
   },
 
   footerButtonPressed: {
-    backgroundColor: '#FEEEEC'
+    backgroundColor: '#FEFEFE'
   }
 })
