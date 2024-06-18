@@ -1,19 +1,22 @@
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import MainTabNavigator from "./_MainTabNavigator"
-import LoginScreen from './src/features/login/LoginScreen';
+import MainTabNavigator from './_MainTabNavigator'
+import LoginNavigator from './LoginNavigator'
+import { useAuthValue } from '../contexts/AuthContext'
 
 export default function GlobalNavigator() {
   const Stack = createNativeStackNavigator();
-  const isLoggedIn = true; // get from user service
+
+  const {currentUser} = useAuthValue()
+  console.log(currentUser)
 
   return (
-    <Stack.Navigator>
-      {!isLoggedIn ? (
-        <Stack.Screen name="Login" component={LoginScreen} />
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {!currentUser ? (
+        <Stack.Screen name="LoginNav" component={LoginNavigator} />
       ) : (
-        <Stack.Screen name="App" component={MainTabNavigator} />
+        <Stack.Screen name="Root" component={MainTabNavigator} />
       )}
     </Stack.Navigator>
   )

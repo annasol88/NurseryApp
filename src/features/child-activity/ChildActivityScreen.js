@@ -1,5 +1,5 @@
-import { Text, StyleSheet, Pressable, SafeAreaView, View, Image } from 'react-native';
-import { GlobalStyles } from '../../styles/shared.styles'
+import { Text, StyleSheet, Pressable, View, Image } from 'react-native';
+import { GlobalStyles } from '../../../styles/shared.styles'
 
 const ACTIVITY_DATA = [
     {
@@ -44,8 +44,17 @@ const CHILD_DATA = {
   }
 
 export default function ChildActivityScreen({navigation}) {
+
+  reportAbsence = () => {
+    navigation.navigate('Report Absence')
+  }
+
+  viewChildInfo = () => {
+    navigation.navigate('Child Information')
+  }
+
   return (
-    <View style={GlobalStyles.main}>
+    <View style={GlobalStyles.screen}>
       <View style={GlobalStyles.container}>
         <View style={styles.header}>
             <Image
@@ -57,8 +66,12 @@ export default function ChildActivityScreen({navigation}) {
       </View>
 
       <View>
-        <Pressable onPress={navigation.navigate('Report Absence')}> 
-          Report absence or sickness
+        <Pressable onPress={reportAbsence} styles={GlobalStyles.buttonPrimary}> 
+          <Text>Report absence or sickness</Text>
+        </Pressable>
+
+        <Pressable onPress={viewChildInfo} > 
+          <Text>View Child Information</Text>
         </Pressable>
       </View>
     </View>

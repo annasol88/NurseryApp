@@ -11,7 +11,7 @@ export default function ChildActivityNavigator() {
       <Stack.Navigator>
         <Stack.Screen name="My Child" component={ChildActivityScreen} />
         <Stack.Screen name="Report Absence" component={ReportAbsenceScreen} />
-        <Stack.Screen name="View Child Information" component={ChildInformationScreen} />
+        <Stack.Screen name="Child Information" component={ChildInformationScreen} />
       </Stack.Navigator>
     )
   }

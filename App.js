@@ -1,14 +1,24 @@
 import { NavigationContainer } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import GlobalNavigator from './src/navigators/_GlobalNavigator';
-import GlobalStyles from './src/styles/shared.styles'
+import { useState, useEffect } from 'react'
+import { auth } from './src/firebase/main'
+import { onAuthStateChanged } from 'firebase/auth'
+import { AuthProvider } from './src/contexts/AuthContext'
 
 export default function App() { 
+  const [currentUser, setCurrentUser] = useState(null)
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user)
+     })
+  }, [])
+
   return (
-    <SafeAreaView style={GlobalStyles.main}>
+    <AuthProvider value={{currentUser}}>
       <NavigationContainer>
         <GlobalNavigator />
       </NavigationContainer>
-    </SafeAreaView>
+    </AuthProvider>
   )
 }

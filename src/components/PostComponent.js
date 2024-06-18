@@ -1,19 +1,30 @@
 import { Text, StyleSheet, View, Image, Pressable } from 'react-native';
 import { formatDistance } from 'date-fns';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { GlobalStyles } from '../styles/shared.styles';
+import { GlobalStyles } from '../../styles/shared.styles';
+import { updatePost } from '../services/NewsFeedService'
 
-export default function Post(postData) {
+export default function Post(currentUser, postData) {
   elapsedTime = () => {
     return formatDistance(new Date(postData.timestamp), new Date(), { addSuffix: true });
   }
 
   like = () => {
-    console.log('like clicked')
+    if(isLiked()) {
+      postData.likes.remove(currentUser.email)
+    } else {
+      postData.likes.push(currentUser.email)
+    }
+
+    updatePost(postData.id, postData)
   }
 
   viewComments = () => {
-    console.log('comments clicked')
+    console.log(`post: ${postData.key} comments clicked`)
+  }
+
+  isLiked = () => {
+    return postData.likes.includes(currentUser.email)
   }
 
   return (
@@ -24,7 +35,7 @@ export default function Post(postData) {
           source={{uri: postData.userAvatar}}
         /> 
         <Text style={styles.headerText} >{postData.userName}</Text>
-        <Text style={styles.headerTimestamp} >{elapsedTime(postData.timestamp)}</Text>
+        <Text style={styles.headerTimestamp} >{elapsedTime()}</Text>
       </View>
 
       <View style={styles.content}>
@@ -35,12 +46,12 @@ export default function Post(postData) {
         <View style={styles.footerItem}>
           <Pressable onPress={like} style={({pressed}) => [styles.footerButton, pressed ? styles.footerButtonPressed: '']}>
             <MaterialCommunityIcons 
-                name="cards-heart-outline" // cards-heart
-                size={25}
-                color={'#F85A3E'}
+              name={ isLiked() ? "cards-heart" : "cards-heart-outline" } 
+              size={25}
+              color={'#F85A3E'}
             />
           </Pressable>
-          <Text>{postData.likes} likes</Text>
+          <Text>{postData.likes.length} likes</Text>
         </View>
 
         <View style={styles.footerItem}>
@@ -111,6 +122,6 @@ const styles = StyleSheet.create({
   },
 
   footerButtonPressed: {
-    backgroundColor: '#FEFEFE'
+    backgroundColor: '#EFEFEF'
   }
 })

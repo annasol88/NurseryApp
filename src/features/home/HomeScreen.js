@@ -1,36 +1,50 @@
-import { FlatList, SafeAreaView } from 'react-native';
-import Post from '../../components/PostComponent';
-import { GlobalStyles } from '../../styles/shared.styles';
+import { useState, useEffect } from 'react'
+import { FlatList, Text, View} from 'react-native';
 
-const DATA = [
-  {
-    key: 1,
-    content: 'Tomorrow is PJ day!!!',
-    images: [],
-    timestamp: Date.now(),
-    userAvatar: 'https://avataaars.io/?avatarStyle=Circle',
-    userName: 'Nursery Office',
-    likes: 0,
-    comments: []
-  },
-  {
-    key: 2,
-    content: 'Fantastic experiement today!!!',
-    images: [],
-    timestamp: Date.now(),
-    userAvatar: 'https://avataaars.io/?avatarStyle=Circle',
-    userName: 'Nursery Office',
-    likes: 0,
-    comments: []
-  }
-]
+import Post from '../../components/PostComponent';
+import { GlobalStyles } from '../../../styles/shared.styles'
+import { getPosts } from '../../services/NewsFeedService';
+import { useAuthValue } from '../../contexts/AuthContext';
 
 export default function HomeScreen({navigation}) {
+  let {currentUser} = useAuthValue()
+  let [isLoading, changeLoading] = useState(true);
+  let [posts, changePosts] = useState([]);
+  let [error, changeError] = useState(false);
+
+  useEffect(() => {
+    getPosts().then((p) => {
+      changeLoading(false)
+      changePosts(p)
+      console.log(p)
+    }).catch((e) => {
+      console.error(e)
+      changeLoading(false)
+      changeError(true)
+    })
+  }, [])
+
   return (
-    <FlatList
-      data={DATA}
-      renderItem={({item}) => Post(item)}
-    />
+    <View style={GlobalStyles.screen}>
+    {isLoading && 
+      <Text>Loading...</Text>
+    }
+
+    {!isLoading && posts.length == 0 && 
+      <Text>No Posts</Text>
+    }
+
+    {error && 
+      <Text>Something went wrong fetching posts. Please try again later</Text>
+    }
+
+    {posts.length > 0 && 
+      <FlatList
+        data={posts}
+        renderItem={({item}) => Post(currentUser, item)}
+      />
+    }
+    </View>
   );
 }
 

@@ -1,10 +1,7 @@
-import { SafeAreaView, Text } from 'react-native';
-import { GlobalStyles } from '../../styles/shared.styles';
+import { View, Text } from 'react-native';
 
 export default function PersonalDetailsScreen() {
-    return (
-      <SafeAreaView style={GlobalStyles.main}>
-        <Text>personal details screen!</Text>
-      </SafeAreaView>
-    )
+  return (
+    <Text>personal details screen!</Text>
+  )
 }

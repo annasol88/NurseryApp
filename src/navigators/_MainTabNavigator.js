@@ -1,9 +1,10 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 
-import HomeScreen from './src/features/home/HomeScreen';
-import ChildActivityAdminScreen from'./src/features/child-activity-admin/ChildActivityAdminScreen'
-import ChildActivityScreen from './src/features/child-activity/ChildActivityScreen';
-import SettingsScreen from './src/features/settings/SettingsScreen';
+import HomeNavigator from './HomeNavigator';
+import ChildActivityAdminScreen from '../features/child-activity-admin/ChildAdminScreen'
+import ChildActivityNavigator from './ChildActivityNavigator'
+import SettingsNavigator from './SettingsNavigator';
 
 export default function MainTabNavigator() {
     const Tab = createBottomTabNavigator();
@@ -11,10 +12,10 @@ export default function MainTabNavigator() {
     const isParent = true; //TODO refactor to user service
 
     return (
-      <Tab.Navigator initialRouteName="News Feed">
+      <Tab.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
         <Tab.Screen 
-          name="News Feed" 
-          component={HomeScreen} 
+          name="HomeNav" 
+          component={HomeNavigator} 
           options={{
             tabBarLabel: 'News Feed',
             tabBarIcon: ({ color, size }) => (
@@ -22,10 +23,10 @@ export default function MainTabNavigator() {
             ),
           }}
         />
-        {!isParent ? (
+        {isParent ? (
           <Tab.Screen 
-            name="My Child" 
-            component={ChildActivityScreen}
+            name="ChildNav" 
+            component={ChildActivityNavigator}
             options={{
               tabBarLabel: 'My Child',
               tabBarIcon: ({ color, size }) => (
@@ -35,7 +36,7 @@ export default function MainTabNavigator() {
           />
         ) : (
           <Tab.Screen 
-            name="Child Activities" 
+            name="ChildAdminNav" 
             component={ChildActivityAdminScreen}
             options={{
               tabBarLabel: 'Child Activities',
@@ -47,8 +48,8 @@ export default function MainTabNavigator() {
         )}
 
         <Tab.Screen 
-          name="Settings" 
-          component={SettingsScreen}
+          name="SettingsNav" 
+          component={SettingsNavigator}
           options={{
             tabBarLabel: 'Settings',
             tabBarIcon: ({ color, size }) => (
