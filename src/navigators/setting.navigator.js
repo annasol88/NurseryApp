@@ -1,8 +1,8 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import PersonalDetailsScreen from '../features/settings/PersonalDetailsScreen';
-import ChangePasswordScreen from '../features/settings/ChangePasswordScreen';
-import SettingsScreen from '../features/settings/SettingsScreen';
+import PersonalDetailsScreen from '../features/settings/personal-details.screen';
+import ChangePasswordScreen from '../features/settings/change-password.screen';
+import SettingsScreen from '../features/settings/settings.screen';
 
 
 export default function SettingsNavigator() {
