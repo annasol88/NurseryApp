@@ -144,5 +144,9 @@ export const LoginStyles = StyleSheet.create({
 
   input: {
     width:'70%'
+  },
+
+  invalidText: {
+    width: '70%'
   }
 })

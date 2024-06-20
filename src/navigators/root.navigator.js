@@ -2,8 +2,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 import HomeNavigator from './news-feed.navigator';
-import ChildrenAdminScreen from '../features/children-admin/children-admin.screen';
-import ChildActivityNavigator from './my-children.navigator'
+import ChildrenAdminNavigator from './children-admin.navigator'
+import MyChildrenNavigator from './my-children.navigator'
 import SettingsNavigator from './setting.navigator';
 import { useUserContext } from '../contexts/user.context'
 
@@ -12,9 +12,9 @@ export default function RootNavigator() {
   const {currentUser} = useUserContext();
 
   return (
-    <Tab.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
+    <Tab.Navigator initialRouteName="NewsFeedNav" screenOptions={{ headerShown: false }}>
       <Tab.Screen 
-        name="HomeNav" 
+        name="NewsFeedNav" 
         component={HomeNavigator} 
         options={{
           tabBarLabel: 'News Feed',
@@ -23,21 +23,22 @@ export default function RootNavigator() {
           ),
         }}
       />
-      {currentUser.role === 'ADIM' ? (
+
+      {currentUser.role == 'ADMIN' ? (
         <Tab.Screen 
-          name="ChildAdminNav" 
-          component={ChildrenAdminScreen}
+          name="ChildrenAdminNav" 
+          component={ChildrenAdminNavigator}
           options={{
-            tabBarLabel: 'Child Admin',
+            tabBarLabel: 'Children',
             tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="baby-face" color={color} size={size} />
+              <MaterialCommunityIcons name="account-group" color={color} size={size} />
             ),
           }} 
         />
       ) : (
         <Tab.Screen 
-          name="ChildNav" 
-          component={ChildActivityNavigator}
+          name="MyChildrenNav" 
+          component={MyChildrenNavigator}
           options={{
             tabBarLabel: 'My Children',
             tabBarIcon: ({ color, size }) => (

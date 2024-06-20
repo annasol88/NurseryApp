@@ -16,16 +16,22 @@ export default function LoginScreen({navigation}) {
       signInWithEmailAndPassword(auth, email, password)
       .catch((error) => {
         switch(error.code) {
-          case 'user-not-found':
+          case 'auth/invalid-email': 
+            validationMessageChange('Invalid email format.')
+            emailInvalidChange(true)
+            break;
+          case 'auth/user-not-found':
             validationMessageChange('Email entered does not match any existing account.')
             emailInvalidChange(true);
             break;
-          case 'wrong-password':
+          case 'auth/invalid-credential':
             validationMessageChange('Incorrect Password entered.')
             passwordInvalidChange(true);
             break;
           default: 
-            validationMessageChange('Something went wrong when trying to sign you up. PLease try again later.')
+            validationMessageChange('Something went wrong when trying to sign you up. Please try again later.')
+            console.error(error)
+            break;
         }
       });
     }
@@ -77,7 +83,7 @@ export default function LoginScreen({navigation}) {
       />
 
       { validationMessage && 
-        <Text style={GlobalStyles.invalidText}>{validationMessage}</Text>
+        <Text style={[GlobalStyles.invalidText, LoginStyles.invalidText]}>{validationMessage}</Text>
       }
 
       <Pressable onPress={login} style={({pressed}) =>[

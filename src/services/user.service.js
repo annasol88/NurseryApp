@@ -22,3 +22,8 @@ export async function getUser(userEmail) {
   console.warn(`User with email: ${userEmail} not found.`)
   return undefined
 }
+
+export async function updateUserChildren(userEmail, chilUserName) {
+  const ref = doc(db, USER_PATH, userEmail);
+  return setDoc(ref, { children: [ chilUserName ] }, { merge: true });
+}

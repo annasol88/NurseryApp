@@ -1,3 +1,8 @@
+import { setDoc, doc, getDoc } from 'firebase/firestore'; 
+import { uploadString, ref, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../firebase/main'
+import { updateUserChildren } from './user.service'
+
 const ACTIVITY_DATA = [
     {
         type: 'ABSENT',
@@ -41,7 +46,7 @@ const CHILD_DATA = {
     activities: ACTIVITY_DATA
   }
 
-const CHILDREN_PATH = 'CHILDREN'
+const CHILDREN_PATH = 'children'
 
 export async function getChild(childUserName) {
   const docRef = doc(db, CHILDREN_PATH, childUserName);
@@ -53,8 +58,37 @@ export async function getChild(childUserName) {
   return undefined
 }
 
-export async function setChild() {
-    // if not exists create
-    // validate child exists
-    // and associate with current user as parent
+export function newChild(parentEmail, name, dob, address, allergies, diet, doctor) {
+  return {
+    userName: `${parentEmail}_${name}`,
+    name: name,
+    dob: dob,
+    address: address,
+    allergies: allergies,
+    diet: diet,
+    doctor: doctor,
+    activities: []
+  }
+}
+
+export async function setChild(parentEmail, childData, avatarFile) {
+  if(avatarFile) {
+    const avatarRef = ref(storage, `avatars/child/${childData.userName}`);
+    uploadString(avatarRef, avatarFile).then((snapshot) => {
+      const childRef = doc(db, CHILDREN_PATH, childData.userName);
+      getDownloadURL(snapshot.ref).then(function(url) {
+        setDoc(childRef, {
+          avatarUrl: url,
+          ...childData
+        });
+        updateUserChildren(parentEmail, childData.userName)
+      });
+    });
+  }
+  // TODO set doc without updating image
+}
+
+export async function addActivity(username) {
+  const ref = doc(db, CHILDREN_PATH, username);
+  return setDoc(ref, { activities: true }, { merge: true });
 }

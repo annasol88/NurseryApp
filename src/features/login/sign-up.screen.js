@@ -37,6 +37,7 @@ export default function SignUpScreen({navigation}) {
             break;
           default: 
             validationMessageChange('Something went wrong when trying to sign you up. Please try again later.')
+            console.error(error)
             break;
         }
       });
@@ -98,7 +99,7 @@ export default function SignUpScreen({navigation}) {
       />
 
       { validationMessage && 
-        <Text style={GlobalStyles.invalidText}>{validationMessage}</Text>
+        <Text style={[GlobalStyles.invalidText, LoginStyles.invalidText]}>{validationMessage}</Text>
       }
 
       <Pressable 
