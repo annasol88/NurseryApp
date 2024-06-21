@@ -51,7 +51,7 @@ export default function NewPostScreen({navigation}) {
         <Text style={GlobalStyles.invalidText}>{validationMessage}</Text>
       }
 
-      <Pressable style={GlobalStyles.buttonPrimary} onPress={postClicked}>
+      <Pressable onPress={postClicked} style={({pressed}) => [GlobalStyles.buttonPrimary, pressed && GlobalStyles.buttonPrimaryPressed]}>
         <Text style={GlobalStyles.buttonPrimaryContent}>Post</Text>
       </Pressable>
 

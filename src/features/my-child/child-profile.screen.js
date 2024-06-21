@@ -24,8 +24,7 @@ export default function ChildProfileScreen({route, navigation}) {
 
   takeImageClicked = () => {
     navigation.navigate('Take Profile Image', {
-      imageSelected: (pic) => {
-        changeAvatar(pic)},
+      imageSelected: (pic) => changeAvatar(pic)
     });
   }
 
@@ -170,7 +169,7 @@ export default function ChildProfileScreen({route, navigation}) {
         </View>
         <Pressable 
           onPress={saveDetailsClicked} 
-          style={(pressed) => [GlobalStyles.buttonPrimary, pressed && GlobalStyles.buttonPrimaryPressed]}
+          style={({pressed}) => [GlobalStyles.buttonPrimary, pressed && GlobalStyles.buttonPrimaryPressed]}
           >
             <Text style={GlobalStyles.buttonPrimaryContent}>Save {child ? 'Changes' : 'Details'}</Text>
         </Pressable>

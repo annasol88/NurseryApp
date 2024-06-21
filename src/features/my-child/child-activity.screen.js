@@ -102,8 +102,8 @@ export default function ChildActivityScreen({navigation}) {
       </View>
 
       { childData.activities?.length > 0 ? (
-        <View >
-          
+        <View>
+          <Text>activities go here</Text>
         </View>
       ) : (
         <View style={[GlobalStyles.container, GlobalStyles.empty]}>
