@@ -1,17 +1,18 @@
 import { useState } from 'react'
 import { View, Text, Image, Pressable, TextInput, StyleSheet, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { EventRegister } from 'react-native-event-listeners';
 
 import { useUserContext } from '../../contexts/user.context';
 import { GlobalStyles } from '../../../styles/shared.styles';
-import { newChild, setChild } from '../../services/child.service';
+import { generateUserName, newChild, setChild, setChildAndAvatar } from '../../services/child.service';
 
-export default function EditChildProfileScreen({route, navigation}) {
+export default function ChildProfileScreen({route, navigation}) {
   const {child} = route.params;
   const {currentUser} = useUserContext()
 
   let [childName, changeChildName] = useState(child?.name ?? '')
-  let [avatar, changeAvatar] = useState(child?.avatar ?? undefined)
+  let [avatarUrl, changeAvatar] = useState(child?.avatarUrl ?? undefined)
   let [dob, changeDob] = useState(child?.dob ?? undefined)
   let [address, changeAddress] = useState(child?.address ?? '')
   let [allergies, changeAllergies] = useState(child?.allergies ?? '')
@@ -33,13 +34,35 @@ export default function EditChildProfileScreen({route, navigation}) {
   }
 
   saveDetailsClicked = () => {
-    let childData = newChild(currentUser.email, childName, new Date(), address, allergies, diet, doctor)
-    setChild(currentUser.email, childData, avatar).then(() => {
-      navigation.goBack();
-    }).catch(e => {
-      //TODO show error
-      console.error(e)
-    })
+    //TODO validation
+    //TODO handle username change if name updated
+
+    let childUserName = child?.username ?? generateUserName(currentUser.email, childName)
+    let avatarChange = avatarUrl != '' && avatarUrl != child?.avatarUrl
+
+    if(avatarChange) {
+      // avatar will be set in child service
+      let childData = newChild(childUserName, childName, '', new Date(), address, allergies, diet, doctor)
+      setChildAndAvatar(currentUser.email, childData, avatarUrl).then(() => {
+        EventRegister.emit('childUpdate', childData)
+        EventRegister.emit('userUpdate', currentUser)
+        navigation.goBack();
+      }).catch(e => {
+        //TODO show error
+        console.error(e)
+      })
+    } else {
+      // avatar already contains existing link to child profile photo or is empty
+      let childData = newChild(childUserName, childName, avatarUrl, new Date(), address, allergies, diet, doctor)
+      setChild(currentUser.email, childData).then(() => {
+        EventRegister.emit('childUpdate', childData)
+        EventRegister.emit('userUpdate', currentUser)
+        navigation.goBack();
+      }).catch(e => {
+        //TODO show error
+        console.error(e)
+      })
+    }
   }
 
   return (
@@ -48,10 +71,10 @@ export default function EditChildProfileScreen({route, navigation}) {
         <View style={GlobalStyles.container}>
           <Text style={GlobalStyles.heading}>Profile Image</Text>
           <View style={styles.profilePicSection} >
-            {avatar && 
+            { avatarUrl && 
               <Image
                 style={styles.avatar}
-                source={{uri: avatar}}
+                source={{uri: avatarUrl}}
               /> 
             }
             <View style={styles.profilePicButtons}>
@@ -149,7 +172,7 @@ export default function EditChildProfileScreen({route, navigation}) {
           onPress={saveDetailsClicked} 
           style={(pressed) => [GlobalStyles.buttonPrimary, pressed && GlobalStyles.buttonPrimaryPressed]}
           >
-            <Text style={GlobalStyles.buttonPrimaryContent}>Save Details</Text>
+            <Text style={GlobalStyles.buttonPrimaryContent}>Save {child ? 'Changes' : 'Details'}</Text>
         </Pressable>
       </View>
     </ScrollView>

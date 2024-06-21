@@ -3,7 +3,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 import HomeNavigator from './news-feed.navigator';
 import ChildrenAdminNavigator from './children-admin.navigator'
-import MyChildrenNavigator from './my-children.navigator'
+import MyChildrenNavigator from './my-child.navigator'
 import SettingsNavigator from './setting.navigator';
 import { useUserContext } from '../contexts/user.context'
 
@@ -37,10 +37,10 @@ export default function RootNavigator() {
         />
       ) : (
         <Tab.Screen 
-          name="MyChildrenNav" 
+          name="MyChildNav" 
           component={MyChildrenNavigator}
           options={{
-            tabBarLabel: 'My Children',
+            tabBarLabel: 'My Child',
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="baby-face" color={color} size={size} />
             ),

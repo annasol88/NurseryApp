@@ -15,15 +15,15 @@ export const GlobalStyles = StyleSheet.create({
   },
 
   empty: {
-    display: 'flex',
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    height: '100%',
   },
 
   emptyText: {
     color: '#909090',
     fontSize: 24,
+    textAlign: 'center',
   },
 
   heading: {

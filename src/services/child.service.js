@@ -1,7 +1,7 @@
 import { setDoc, doc, getDoc } from 'firebase/firestore'; 
 import { uploadString, ref, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase/main'
-import { updateUserChildren } from './user.service'
+import { updateUserChild } from './user.service'
 
 const ACTIVITY_DATA = [
     {
@@ -25,27 +25,6 @@ const ACTIVITY_DATA = [
     }
 ]
 
-const CHILD_DATA = {
-    fullName: 'Anna Solek',
-    avatar: 'https://avataaars.io/?avatarStyle=Circle',
-    dob: new Date(23, 4, 2003),
-    addess: {
-        line1: '1 blah bla road',
-        line2: '',
-        city: 'Glasgow',
-        country: 'United Kingdom',
-        postCode: 'ABC 123'
-    },
-    allergies: 'strawberries',
-    diet: 'lots of brocolli',
-    doctor: {
-        name: 'Dr getbetter',
-        phone: '12345678910',
-        email: 'drgetbetter@hospital.com'
-    },
-    activities: ACTIVITY_DATA
-  }
-
 const CHILDREN_PATH = 'children'
 
 export async function getChild(childUserName) {
@@ -55,13 +34,18 @@ export async function getChild(childUserName) {
     return docSnap.data()
   }
   console.warn(`Child with username: ${childUserName} not found.`)
-  return undefined
+  return Promise.resolve(undefined)
 }
 
-export function newChild(parentEmail, name, dob, address, allergies, diet, doctor) {
+export function generateUserName(parentEmail, name) {
+  return `${parentEmail}_${name}`
+}
+
+export function newChild(username, name, avatarUrl, dob, address, allergies, diet, doctor) {
   return {
-    userName: `${parentEmail}_${name}`,
+    userName: username,
     name: name,
+    avatarUrl: avatarUrl,
     dob: dob,
     address: address,
     allergies: allergies,
@@ -71,24 +55,25 @@ export function newChild(parentEmail, name, dob, address, allergies, diet, docto
   }
 }
 
-export async function setChild(parentEmail, childData, avatarFile) {
-  if(avatarFile) {
-    const avatarRef = ref(storage, `avatars/child/${childData.userName}`);
-    uploadString(avatarRef, avatarFile).then((snapshot) => {
-      const childRef = doc(db, CHILDREN_PATH, childData.userName);
-      getDownloadURL(snapshot.ref).then(function(url) {
-        setDoc(childRef, {
-          avatarUrl: url,
-          ...childData
-        });
-        updateUserChildren(parentEmail, childData.userName)
-      });
-    });
-  }
-  // TODO set doc without updating image
+export async function setChildAndAvatar(parentEmail, childData, avatarFile) {
+  const avatarRef = ref(storage, `avatars/child/${childData.userName}`);
+  const snapshot = await uploadString(avatarRef, avatarFile)
+  const url = await getDownloadURL(snapshot.ref);
+  childData.avatarUrl = url
+  return await setChild(parentEmail, childData);
+}
+
+export async function setChild(parentEmail, childData) {
+  const childRef = doc(db, CHILDREN_PATH, childData.userName);
+  let setChild = setDoc(childRef, childData, { merge: true });
+
+  // handle seperately...
+  let setUserChildren = updateUserChild(parentEmail, childData.userName)
+
+  return Promise.all([setChild, setUserChildren])
 }
 
 export async function addActivity(username) {
   const ref = doc(db, CHILDREN_PATH, username);
-  return setDoc(ref, { activities: true }, { merge: true });
+
 }

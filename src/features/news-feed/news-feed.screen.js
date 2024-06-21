@@ -58,40 +58,42 @@ export default function NewsFeedScreen({navigation}) {
 
   if(isLoading) {
     return <Text style={GlobalStyles.center}>Loading...</Text>
-  } else if(error) {
+  } 
+  
+  if(error) {
     return (
       <View style={[GlobalStyles.container, GlobalStyles.empty]}>
         <Text style={GlobalStyles.emptyText}>Something went wrong fetching posts. Please try again later</Text>
       </View>
     )
-  } else {
-    return (
-      <>
-      { posts?.length > 0 ? (
-         <View style={GlobalStyles.screen}>
-          { currentUser.role == 'ADMIN' && 
-            <Pressable onPress={newPostPageClicked} style={GlobalStyles.buttonPrimary}>
-              <Text style={GlobalStyles.buttonPrimaryContent}>+ Create New Post</Text>
-            </Pressable>
-          }
-          <FlatList
-            data={posts}
-            renderItem={({item}) => {return <Post postData={item} />}}
-          />
-        </View>
-      ) : (
-        <View style={[GlobalStyles.container, GlobalStyles.empty]}>
-          <Text style={GlobalStyles.emptyText}>No Posts</Text>
-          { currentUser.role == 'ADMIN' && 
-            <Pressable onPress={newPostPageClicked} style={GlobalStyles.buttonPrimary}>
-              <Text style={GlobalStyles.buttonPrimaryContent}>+ Create New Post</Text>
-            </Pressable>
-          }
-        </View>
-      )}
-      </>
-    )
-  }
+  } 
+
+  return (
+    <>
+    { posts?.length > 0 ? (
+      <View style={GlobalStyles.screen}>
+        { currentUser.role == 'ADMIN' && 
+          <Pressable onPress={newPostPageClicked} style={GlobalStyles.buttonPrimary}>
+            <Text style={GlobalStyles.buttonPrimaryContent}>+ Create New Post</Text>
+          </Pressable>
+        }
+        <FlatList
+          data={posts}
+          renderItem={({item}) => {return <Post postData={item} />}}
+        />
+      </View>
+    ) : (
+      <View style={[GlobalStyles.container, GlobalStyles.empty]}>
+        <Text style={GlobalStyles.emptyText}>No Posts</Text>
+        { currentUser.role == 'ADMIN' && 
+          <Pressable onPress={newPostPageClicked} style={GlobalStyles.buttonPrimary}>
+            <Text style={GlobalStyles.buttonPrimaryContent}>+ Create New Post</Text>
+          </Pressable>
+        }
+      </View>
+    )}
+    </>
+  )
 }
 
 const styles = StyleSheet.create({

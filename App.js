@@ -8,30 +8,31 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { UserProvider } from './src/contexts/user.context'
 import { getUser } from './src/services/user.service'
 import { GlobalStyles } from './styles/shared.styles'
-import Camera from './src/features/news-feed/CameraTestScreen';
+import { EventRegister } from 'react-native-event-listeners'
 
 export default function App() { 
   const [currentUser, changeCurrentUser] = useState(undefined)
   const [isLoading, changeIsLoading] = useState(true)
 
   useEffect(() => {
+    let userChangesListener = EventRegister.addEventListener('userUpdate', fetchUser)
     onAuthStateChanged(auth, (user) => {
-      if(user) {
-        getUser(user.email).then((user) => {
-          changeCurrentUser(user)
-          changeIsLoading(false)
-        })
-        // setCurrentUser({
-        //   email: user.email,
-        //   role: 'PARENT',
-        //   children: ['annasol', 'jojo']
-        // })
-      } else {
-        changeCurrentUser(undefined)
-        changeIsLoading(false)
-      }
+      fetchUser(user)
     })
+    return () => {
+      EventRegister.removeEventListener(userChangesListener)
+    }
   }, [])
+
+  fetchUser = async (user) => {
+    if(user) {
+      let u = await getUser(user.email)
+      changeCurrentUser(u)
+    } else {
+      changeCurrentUser(undefined)
+    }
+    changeIsLoading(false)
+  }
 
   if(isLoading) {
     return (

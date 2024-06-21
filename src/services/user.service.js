@@ -9,7 +9,6 @@ export async function createUser(userEmail) {
   return setDoc(doc(usersRef, userEmail), {
     email: userEmail,
     role: 'PARENT',
-    children: []
   });
 }
   
@@ -19,11 +18,11 @@ export async function getUser(userEmail) {
   if(docSnap.exists()) {
     return docSnap.data()
   }
-  console.warn(`User with email: ${userEmail} not found.`)
-  return undefined
+  console.error(`User with email: ${userEmail} not found.`)
+  return Promise.resolve(undefined)
 }
 
-export async function updateUserChildren(userEmail, chilUserName) {
+export async function updateUserChild(userEmail, chilUserName) {
   const ref = doc(db, USER_PATH, userEmail);
-  return setDoc(ref, { children: [ chilUserName ] }, { merge: true });
+  return setDoc(ref, { child: chilUserName }, { merge: true });
 }
