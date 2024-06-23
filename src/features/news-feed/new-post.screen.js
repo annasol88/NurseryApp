@@ -12,20 +12,23 @@ export default function NewPostScreen({navigation}) {
 
   let [text, changeText] = useState('')
   let [validationMessage, changeValidationMessage] = useState('')
+
+  let [isLoading, changeLoading] = useState(false);
   let [error, changeError] = useState(false)
 
   postClicked = () => {
-    if(validateText()) {
-      let post = newPost(text, [], currentUser.email, 'https://avataaars.io/?avatarStyle=Circle')
-      createPost(post)
-      .then(() => {
-        EventRegister.emit('postCreated', post)
-        navigation.navigate('News Feed')
-      }).catch(e => {
-        console.error(e)
-        changeError(true)
-      })
-    }
+    if(!validateText()){ return }
+    changeLoading(true)
+
+    let post = newPost(text, [], currentUser.email, 'https://avataaars.io/?avatarStyle=Circle')
+    createPost(post)
+    .then(() => {
+      EventRegister.emit('postCreated', post)
+      navigation.navigate('News Feed')
+    }).catch(e => {
+      console.error(e)
+      changeError(true)
+    }).finally(() => changeLoading(fkase))
   }
 
   validateText = () => {
@@ -35,6 +38,18 @@ export default function NewPostScreen({navigation}) {
     }
     return true;
   }
+
+  if(isLoading) {
+    return <Text style={GlobalStyles.center}>Loading...</Text>
+  } 
+  
+  if(error) {
+    return (
+      <View style={[GlobalStyles.container, GlobalStyles.empty]}>
+        <Text style={GlobalStyles.emptyText}>Something went wrong when trying to create a new post, please try again later.</Text>
+      </View>
+    )
+  } 
 
   return (
     <View style={GlobalStyles.screen}>
@@ -54,10 +69,6 @@ export default function NewPostScreen({navigation}) {
       <Pressable onPress={postClicked} style={({pressed}) => [GlobalStyles.buttonPrimary, pressed && GlobalStyles.buttonPrimaryPressed]}>
         <Text style={GlobalStyles.buttonPrimaryContent}>Post</Text>
       </Pressable>
-
-      { error && 
-        <Text>Something went wrong when trying to create a new post, please try again later</Text>
-      }
     </View>
   )
 }

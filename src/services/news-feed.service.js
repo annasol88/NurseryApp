@@ -13,6 +13,7 @@ export async function getPosts() {
   return posts
 }
 
+// all data uploads are created through calling newPost to ensure consistent data mappings
 export function newPost(content, images, userName, userAvatar) {
   return {
     content: content,

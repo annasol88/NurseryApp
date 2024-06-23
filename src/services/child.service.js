@@ -41,6 +41,7 @@ export function generateUserName(parentEmail, name) {
   return `${parentEmail}_${name}`
 }
 
+// all data uploads are created through calling newChild to ensure consistent data mappings
 export function newChild(username, name, avatarUrl, dob, address, allergies, diet, doctor) {
   return {
     userName: username,
@@ -55,25 +56,18 @@ export function newChild(username, name, avatarUrl, dob, address, allergies, die
   }
 }
 
-export async function setChildAndAvatar(parentEmail, childData, avatarFile) {
-  const avatarRef = ref(storage, `avatars/child/${childData.userName}`);
-  const snapshot = await uploadString(avatarRef, avatarFile)
-  const url = await getDownloadURL(snapshot.ref);
-  childData.avatarUrl = url
-  return await setChild(parentEmail, childData);
+export async function setAvatar(childUserName, avatarFile) {
+  const avatarRef = ref(storage, `avatars/child/${childUserName}`);
+  const snapshot = await uploadString(avatarRef, avatarFile, 'data_url')
+  return await getDownloadURL(snapshot.ref);
 }
 
-export async function setChild(parentEmail, childData) {
+export async function setChild(childData) {
   const childRef = doc(db, CHILDREN_PATH, childData.userName);
-  let setChild = setDoc(childRef, childData, { merge: true });
-
-  // handle seperately...
-  let setUserChildren = updateUserChild(parentEmail, childData.userName)
-
-  return Promise.all([setChild, setUserChildren])
+  return setDoc(childRef, childData, { merge: true });
 }
 
 export async function addActivity(username) {
   const ref = doc(db, CHILDREN_PATH, username);
-
+//ToDo
 }

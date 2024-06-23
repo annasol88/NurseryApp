@@ -63,7 +63,7 @@ export default function NewsFeedScreen({navigation}) {
   if(error) {
     return (
       <View style={[GlobalStyles.container, GlobalStyles.empty]}>
-        <Text style={GlobalStyles.emptyText}>Something went wrong fetching posts. Please try again later</Text>
+        <Text style={GlobalStyles.emptyText}>Something went wrong fetching posts. Please try again later.</Text>
       </View>
     )
   } 

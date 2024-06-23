@@ -8,6 +8,7 @@ export async function createUser(userEmail) {
   // user email is used as path because this is taken from auth so will always be unique 
   return setDoc(doc(usersRef, userEmail), {
     email: userEmail,
+    // only parent accounts can be created through app for security purposes
     role: 'PARENT',
   });
 }

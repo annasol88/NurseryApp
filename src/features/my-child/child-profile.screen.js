@@ -5,7 +5,8 @@ import { EventRegister } from 'react-native-event-listeners';
 
 import { useUserContext } from '../../contexts/user.context';
 import { GlobalStyles } from '../../../styles/shared.styles';
-import { generateUserName, newChild, setChild, setChildAndAvatar } from '../../services/child.service';
+import { generateUserName, newChild, setChild, setAvatar } from '../../services/child.service';
+import { updateUserChild } from '../../services/user.service'
 
 export default function ChildProfileScreen({route, navigation}) {
   const {child} = route.params;
@@ -19,8 +20,12 @@ export default function ChildProfileScreen({route, navigation}) {
   let [diet, changeDiet] = useState(child?.diet ?? '')
   let [doctor, changeDoctor] = useState(child?.doctor ?? '')
 
-  let [childNameInvalid, changeChildNameInvalid] = useState(false)
-  let [addressInvalid, changeAddressInvalid] = useState(false)
+  let [childNameValidation, changeChildNameValidation] = useState('')
+  let [dobValidation, changeDobValidation] = useState('')
+  let [addressValidation, changeAddressValidation] = useState('')
+
+  let [isLoading, changeLoading] = useState(false);
+  let [error, changeError] = useState(false);
 
   takeImageClicked = () => {
     navigation.navigate('Take Profile Image', {
@@ -32,44 +37,87 @@ export default function ChildProfileScreen({route, navigation}) {
     console.log('upload image')
   }
 
-  saveDetailsClicked = () => {
-    //TODO validation
-    //TODO handle username change if name updated
+  saveDetailsClicked = async () => {
+    if(!validateDetails()){ return }
 
-    let childUserName = child?.username ?? generateUserName(currentUser.email, childName)
-    let avatarChange = avatarUrl != '' && avatarUrl != child?.avatarUrl
+    changeLoading(true)
+    // to ensure valid sername is generated child name is trimmed
+    let cleanChildName = childName.trim()
 
-    if(avatarChange) {
-      // avatar will be set in child service
-      let childData = newChild(childUserName, childName, '', new Date(), address, allergies, diet, doctor)
-      setChildAndAvatar(currentUser.email, childData, avatarUrl).then(() => {
+    // if no child data is currently stored
+    if(!child) {
+      let childUserName = generateUserName(currentUser.email, cleanChildName)
+      storedAvatarUrl = await setAvatar(childUserName, avatarUrl)
+      let childData = newChild(childUserName, childName, storedAvatarUrl, new Date(), address, allergies, diet, doctor)
+      let setChildComplete = setChild(childData)
+      let updateUserComplete = updateUserChild(currentUser.email, childUserName)
+
+      Promise.all([setChildComplete, updateUserComplete]).then(() => {
         EventRegister.emit('childUpdate', childData)
         EventRegister.emit('userUpdate', currentUser)
         navigation.goBack();
       }).catch(e => {
-        //TODO show error
+        changeError(true)
         console.error(e)
-      })
-    } else {
-      // avatar already contains existing link to child profile photo or is empty
-      let childData = newChild(childUserName, childName, avatarUrl, new Date(), address, allergies, diet, doctor)
-      setChild(currentUser.email, childData).then(() => {
-        EventRegister.emit('childUpdate', childData)
-        EventRegister.emit('userUpdate', currentUser)
-        navigation.goBack();
-      }).catch(e => {
-        //TODO show error
-        console.error(e)
-      })
+      }).finally(() => changeLoading(false))
+      return
     }
+
+    //TODO handle username change on name change
+    //let usernameChange = childName != child?.childName
+    
+    let avatarChange = avatarUrl != '' && avatarUrl != child?.avatarUrl
+    let childData 
+    if(avatarChange) {
+      storedAvatarUrl = await setAvatar(child.userName, avatarUrl)
+      childData = newChild(child.userName, childName, storedAvatarUrl, new Date(), address, allergies, diet, doctor)
+    } else {
+      // avatarUrl already contains existing link to child profile photo if not changed
+      childData = newChild(child.userName, childName, avatarUrl, new Date(), address, allergies, diet, doctor)
+    }
+
+    setChild(childData).then(() => {
+      EventRegister.emit('childUpdate', childData)
+      navigation.goBack();
+    }).catch(e => {
+      changeError(true)
+      console.error(e)
+    }).finally(() => changeLoading(false))
   }
+
+  validateDetails = () => {
+    changeChildNameValidation('')
+    changeDobValidation('')
+    changeAddressValidation('')
+
+    if(childName === undefined){
+      changeChildNameValidation(`You must enter your child's name`)
+      return false
+    } else if (address == '') {
+      changeAddressValidation('You must enter your address.')
+      return false
+    } 
+    return true
+  }
+
+  if(isLoading) {
+    return <Text style={GlobalStyles.center}>Loading...</Text>
+  } 
+  
+  if(error) {
+    return (
+      <View style={[GlobalStyles.container, GlobalStyles.empty]}>
+        <Text style={GlobalStyles.emptyText}>Something went wrong saving child information. Please stry again later</Text>
+      </View>
+    )
+  } 
 
   return (
     <ScrollView>
       <View style={GlobalStyles.screen}>
         <View style={GlobalStyles.container}>
           <Text style={GlobalStyles.heading}>Profile Image</Text>
-          <View style={styles.profilePicSection} >
+          <View style={styles.profilePicSection}>
             { avatarUrl && 
               <Image
                 style={styles.avatar}
@@ -84,7 +132,7 @@ export default function ChildProfileScreen({route, navigation}) {
                   pressed && GlobalStyles.buttonSecondaryPressed
               ]}
               >
-                <MaterialCommunityIcons name="camera" size={16} color={'#F85A3E'} style={GlobalStyles.indent}></MaterialCommunityIcons>
+                <MaterialCommunityIcons name="camera" size={16} color={'#F85A3E'}></MaterialCommunityIcons>
                 <Text style={[GlobalStyles.buttonSecondaryContent, GlobalStyles.indent]}>
                   Take Image
                 </Text>
@@ -96,7 +144,7 @@ export default function ChildProfileScreen({route, navigation}) {
                   pressed && GlobalStyles.buttonSecondaryPressed
               ]}
               >
-                <MaterialCommunityIcons name="upload" size={16} color={'#F85A3E'} style={GlobalStyles.indent}></MaterialCommunityIcons>
+                <MaterialCommunityIcons name="upload" size={16} color={'#F85A3E'}></MaterialCommunityIcons>
                 <Text style={[GlobalStyles.buttonSecondaryContent, GlobalStyles.indent]}>
                     Upload Image
                 </Text>
@@ -112,26 +160,34 @@ export default function ChildProfileScreen({route, navigation}) {
           <TextInput
             style={[
               GlobalStyles.input, 
-              childNameInvalid && GlobalStyles.inputInvalid    
+              childNameValidation && GlobalStyles.inputInvalid    
             ]}
             onChangeText={changeChildName}
-            placeholder="Enter you childs name"
+            placeholder="Enter your child's name"
             inputMode="default"
             value={childName}
           />
+
+          { childNameValidation && 
+            <Text style={GlobalStyles.invalidText}>{childNameValidation}</Text>
+          }
 
           {//TODO date of birth with date picker
           }
 
           <Text style={styles.label}>Address:</Text>
           <TextInput
-            style={[GlobalStyles.input, addressInvalid && GlobalStyles.inputInvalid]}
+            style={[GlobalStyles.input, addressValidation && GlobalStyles.inputInvalid]}
             multiline={true}
             numberOfLines={6}
             onChangeText={changeAddress}
             value={address}
             placeholder="Enter Your Address"
           />
+
+          { addressValidation && 
+            <Text style={GlobalStyles.invalidText}>{addressValidation}</Text>
+          }
         </View>
 
         <View style={GlobalStyles.container}>

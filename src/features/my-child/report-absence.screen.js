@@ -11,7 +11,7 @@ export default function ReportAbsenceScreen({route, navigation}) {
   let [validationMessage, changeValidationMessage] = useState('')
   let [reasonInvalid, changeReasonInvalid] = useState(false)
 
-  let [isLoading, changeLoading] = useState(true);
+  let [isLoading, changeLoading] = useState(false);
   let [error, changeError] = useState(false);
 
   const onDateChange = (event, selectedDate) => {
@@ -19,10 +19,12 @@ export default function ReportAbsenceScreen({route, navigation}) {
   };
 
   saveAbsenceClicked = () => {
+    if(!validateAbsense()){ return }
+
     console.log(date)
-    if(validateAbsence()){
-      //save
-    }
+    changeLoading(true)
+    //save
+    changeLoading(false)
   }
 
   validateAbsence = () => {

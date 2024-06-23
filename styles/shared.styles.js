@@ -68,7 +68,7 @@ export const GlobalStyles = StyleSheet.create({
   },
 
   buttonSecondaryPressed: {
-    backgroundColor: '#E85A3E'
+    backgroundColor: '#EFEFEF'
   },
 
   buttonSecondaryContent: {

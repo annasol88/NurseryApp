@@ -76,7 +76,6 @@ export default function ProfileImageCameraScreen({route, navigation}) {
   // if picture not taken show camera
   return (
     <View style={styles.container}>
-
       <CameraView style={styles.camera} facing={facing} flash={flash} ref={cameraRef}>
         { isLoading && 
           <Text style={styles.loading}>Loading..</Text>

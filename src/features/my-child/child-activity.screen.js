@@ -9,6 +9,31 @@ import { getChild } from '../../services/child.service'
 export default function ChildActivityScreen({navigation}) {
   let {currentUser} = useUserContext()
 
+  let [childData, changeChildData] = useState(undefined);
+  let [isLoading, changeLoading] = useState(true);
+  let [error, changeError] = useState(false);
+
+  useEffect(() => {
+    if(currentUser.child) {
+      fetchChild(currentUser.child);
+    }
+    let childChangeListener = EventRegister.addEventListener('childUpdate', (c) => fetchChild(c.userName))
+    return () => {
+      EventRegister.removeEventListener(childChangeListener)
+    }
+  }, [])
+    
+  fetchChild = (username) => {
+    getChild(username).then((d) => {
+      changeChildData(d)
+    }).catch((e) => {
+      console.error(e)
+      changeError(true)
+    }).finally(() => {
+      changeLoading(false)
+    })
+  }
+
   addChildInfoClicked = () => {
     navigation.navigate('Child Profile', {child: undefined})
   }
@@ -22,33 +47,10 @@ export default function ChildActivityScreen({navigation}) {
           GlobalStyles.buttonSecondary, 
           pressed && GlobalStyles.buttonSecondaryPressed
         ]}>
-          <Text style={GlobalStyles.buttonSecondaryContent}>Add child information</Text>
+          <Text style={GlobalStyles.buttonSecondaryContent}>Add child</Text>
         </Pressable>
       </View>
     )
-  }
-
-  let [isLoading, changeLoading] = useState(true);
-  let [childData, changeChildData] = useState([]);
-  let [error, changeError] = useState(false);
-
-  useEffect(() => {
-    fetchChild(currentUser.child);
-    let childChangeListener = EventRegister.addEventListener('childUpdate', (c) => fetchChild(c.userName))
-    return () => {
-      EventRegister.removeEventListener(childChangeListener)
-    }
-  }, [])
-  
-  fetchChild = (username) => {
-    getChild(username).then((d) => {
-      changeChildData(d)
-    }).catch((e) => {
-      console.error(e)
-      changeError(true)
-    }).finally(() => {
-      changeLoading(false)
-    })
   }
 
   reportAbsenceClicked = () => {
@@ -81,22 +83,28 @@ export default function ChildActivityScreen({navigation}) {
 
   return (
     <View style={GlobalStyles.screen}>
-      <View style={GlobalStyles.container}>
-        <View style={styles.header}>
-            <Image
-              style={styles.headerAvatar}
-              source={{uri: childData.avatarUrl}}
-            /> 
-            <Text>{childData.name}</Text>
-        </View>
+      <View style={[GlobalStyles.container, styles.header]}>
+          <Image
+            style={styles.headerAvatar}
+            source={{uri: childData.avatarUrl}}
+          /> 
+          <Text>{childData.name}</Text>
       </View>
 
       <View style={styles.tab}>
-        <Pressable onPress={reportAbsenceClicked} style={[GlobalStyles.buttonSecondary, styles.tabButton]}> 
+        <Pressable 
+          onPress={reportAbsenceClicked} style={({pressed}) => [
+            styles.tabButton, 
+            pressed && GlobalStyles.buttonSecondaryPressed]}
+        > 
           <Text style={GlobalStyles.buttonSecondaryContent}>Report Absence</Text>
         </Pressable>
 
-        <Pressable onPress={viewChildInfoClicked} style={[GlobalStyles.buttonSecondary, styles.tabButton]}> 
+        <Pressable 
+          onPress={viewChildInfoClicked} style={({pressed}) => [
+            styles.tabButton, 
+            pressed && GlobalStyles.buttonSecondaryPressed]}
+        > 
           <Text style={GlobalStyles.buttonSecondaryContent}>View Profile</Text>
         </Pressable>
       </View>
@@ -135,6 +143,9 @@ const styles = StyleSheet.create({
   },
 
   tabButton: {
-    borderRadius: 50
+    borderRadius: 50,
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 8
   }
 })
