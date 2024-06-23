@@ -1,11 +1,16 @@
 import { useState } from 'react'
-import { Text, View, TextInput, Pressable } from 'react-native';
+import { Text, View, TextInput, Pressable, StyleSheet } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { EventRegister } from 'react-native-event-listeners';
 
 import { GlobalStyles } from '../../../styles/shared.styles';
+import { addActivity, newAbsence } from '../../services/child.service'
+import { useUserContext } from '../../contexts/user.context';
 
 export default function ReportAbsenceScreen({route, navigation}) {
-  let [date, changeDate] = useState(undefined)
+  const {currentUser} = useUserContext()
+
+  let [date, changeDate] = useState(new Date())
   let [reason, changeReason] = useState('')
 
   let [validationMessage, changeValidationMessage] = useState('')
@@ -14,27 +19,30 @@ export default function ReportAbsenceScreen({route, navigation}) {
   let [isLoading, changeLoading] = useState(false);
   let [error, changeError] = useState(false);
 
-  const onDateChange = (event, selectedDate) => {
-    setDate(selectedDate);
-  };
-
   saveAbsenceClicked = () => {
-    if(!validateAbsense()){ return }
-
-    console.log(date)
+    if(!validateAbsence()){ return }
     changeLoading(true)
-    //save
-    changeLoading(false)
+
+    let activity = newAbsence(date.toDateString(), reason)
+
+    addActivity(currentUser.child, activity).then(a => {
+      EventRegister.emit('childAbsenceAdded', activity)
+      navigation.goBack();
+    }).catch(e => {
+      if(e.code == 'ABSENCE_ALREADY_RECORDED') {
+        changeValidationMessage('Absence for this date is already recorded.')
+        return
+      }
+      changeError(true)
+      console.error(e)
+    }).finally(() => changeLoading(false))
   }
 
   validateAbsence = () => {
     changeReasonInvalid(false)
 
-    if(date === undefined){
-      changeValidationMessage('You have not entered a date for the absence')
-      return false
-    } else if (reason == '') {
-      changeValidationMessage('You have not entered a reason for the absence')
+    if (reason == '') {
+      changeValidationMessage('You have not entered a reason for the absence.')
       changeReasonInvalid(true)
       return false
     } 
@@ -55,32 +63,43 @@ export default function ReportAbsenceScreen({route, navigation}) {
 
   return (
     <View style={GlobalStyles.screen}>
+      <View style={GlobalStyles.container}>
+      <Text style={GlobalStyles.label}>Enter date of absence:</Text>
+        <DateTimePicker
+          value={date}
+          mode="date"
+          accentColor="#F85A3E"
+          style={[styles.datePicker]}
+          onChange={(event, selectedDate) => changeDate(selectedDate)}
+        />
 
-      <DateTimePicker
-        value={date}
-        mode="date"
-        onChange={onDateChange}
-      />
+        <Text style={GlobalStyles.label}>Enter reason for absence:</Text>
+        <TextInput
+          style={[GlobalStyles.input, reasonInvalid && GlobalStyles.inputInvalid]}
+          multiline={true}
+          numberOfLines={4}
+          onChangeText={changeReason}
+          value={reason}
+          placeholder="Enter reason for this absence."
+        />
 
-      <TextInput
-        style={[GlobalStyles.input, reasonInvalid && GlobalStyles.inputInvalid]}
-        multiline={true}
-        numberOfLines={4}
-        onChangeText={changeReason}
-        value={reason}
-        placeholder="Enter reason for this absence."
-      />
-
-      { validationMessage && 
-        <Text style={GlobalStyles.invalidText}>{validationMessage}</Text>
-      }
+        { validationMessage && 
+          <Text style={GlobalStyles.invalidText}>{validationMessage}</Text>
+        }
+      </View>
 
       <Pressable 
         onPress={saveAbsenceClicked} 
         style={({pressed}) => [GlobalStyles.buttonPrimary, pressed && GlobalStyles.buttonPrimaryPressed]}
         >
-          <Text style={GlobalStyles.buttonPrimaryContent}>Report</Text>
+          <Text style={GlobalStyles.buttonPrimaryContent}>Save Absence</Text>
       </Pressable>
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  datePicker: {
+    alignSelf: 'flex-start',
+  }
+})

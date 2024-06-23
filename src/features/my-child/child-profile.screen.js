@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { View, Text, Image, Pressable, TextInput, StyleSheet, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { EventRegister } from 'react-native-event-listeners';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { useUserContext } from '../../contexts/user.context';
 import { GlobalStyles } from '../../../styles/shared.styles';
@@ -14,7 +15,7 @@ export default function ChildProfileScreen({route, navigation}) {
 
   let [childName, changeChildName] = useState(child?.name ?? '')
   let [avatarUrl, changeAvatar] = useState(child?.avatarUrl ?? undefined)
-  let [dob, changeDob] = useState(child?.dob ?? undefined)
+  let [dob, changeDob] = useState(child?.dob ?? new Date())
   let [address, changeAddress] = useState(child?.address ?? '')
   let [allergies, changeAllergies] = useState(child?.allergies ?? '')
   let [diet, changeDiet] = useState(child?.diet ?? '')
@@ -48,7 +49,8 @@ export default function ChildProfileScreen({route, navigation}) {
     if(!child) {
       let childUserName = generateUserName(currentUser.email, cleanChildName)
       storedAvatarUrl = await setAvatar(childUserName, avatarUrl)
-      let childData = newChild(childUserName, childName, storedAvatarUrl, new Date(), address, allergies, diet, doctor)
+      let childData = newChild(childUserName, childName, storedAvatarUrl, dob.toDateString(), address, allergies, diet, doctor)
+
       let setChildComplete = setChild(childData)
       let updateUserComplete = updateUserChild(currentUser.email, childUserName)
 
@@ -70,10 +72,10 @@ export default function ChildProfileScreen({route, navigation}) {
     let childData 
     if(avatarChange) {
       storedAvatarUrl = await setAvatar(child.userName, avatarUrl)
-      childData = newChild(child.userName, childName, storedAvatarUrl, new Date(), address, allergies, diet, doctor)
+      childData = newChild(child.userName, childName, storedAvatarUrl, dob.toDateString(), address, allergies, diet, doctor)
     } else {
       // avatarUrl already contains existing link to child profile photo if not changed
-      childData = newChild(child.userName, childName, avatarUrl, new Date(), address, allergies, diet, doctor)
+      childData = newChild(child.userName, childName, avatarUrl, dob.toDateString(), address, allergies, diet, doctor)
     }
 
     setChild(childData).then(() => {
@@ -87,11 +89,10 @@ export default function ChildProfileScreen({route, navigation}) {
 
   validateDetails = () => {
     changeChildNameValidation('')
-    changeDobValidation('')
     changeAddressValidation('')
 
     if(childName === undefined){
-      changeChildNameValidation(`You must enter your child's name`)
+      changeChildNameValidation(`You must enter your child's name.`)
       return false
     } else if (address == '') {
       changeAddressValidation('You must enter your address.')
@@ -113,7 +114,7 @@ export default function ChildProfileScreen({route, navigation}) {
   } 
 
   return (
-    <ScrollView>
+    <ScrollView automaticallyAdjustKeyboardInsets={true}>
       <View style={GlobalStyles.screen}>
         <View style={GlobalStyles.container}>
           <Text style={GlobalStyles.heading}>Profile Image</Text>
@@ -156,14 +157,14 @@ export default function ChildProfileScreen({route, navigation}) {
         <View style={GlobalStyles.container}>
           <Text style={GlobalStyles.heading}>Personal Information</Text>
 
-          <Text style={styles.label}>Child's Name</Text>
+          <Text style={GlobalStyles.label}>Child's Name</Text>
           <TextInput
             style={[
               GlobalStyles.input, 
               childNameValidation && GlobalStyles.inputInvalid    
             ]}
             onChangeText={changeChildName}
-            placeholder="Enter your child's name"
+            placeholder="Enter your child's name..."
             inputMode="default"
             value={childName}
           />
@@ -172,17 +173,24 @@ export default function ChildProfileScreen({route, navigation}) {
             <Text style={GlobalStyles.invalidText}>{childNameValidation}</Text>
           }
 
-          {//TODO date of birth with date picker
-          }
+          <Text style={GlobalStyles.label}>Date of Birth:</Text>
+          <DateTimePicker
+            value={dob}
+            mode="date"
+            accentColor="#F85A3E"
+            maximumDate={new Date()}
+            style={[styles.datePicker]}
+            onChange={(event, selectedDate) => changeDob(selectedDate)}
+          />
 
-          <Text style={styles.label}>Address:</Text>
+          <Text style={GlobalStyles.label}>Address:</Text>
           <TextInput
             style={[GlobalStyles.input, addressValidation && GlobalStyles.inputInvalid]}
             multiline={true}
             numberOfLines={6}
             onChangeText={changeAddress}
             value={address}
-            placeholder="Enter Your Address"
+            placeholder="Enter Your Address..."
           />
 
           { addressValidation && 
@@ -193,40 +201,40 @@ export default function ChildProfileScreen({route, navigation}) {
         <View style={GlobalStyles.container}>
           <Text style={GlobalStyles.heading}>Medical Information</Text> 
 
-          <Text style={styles.label}>Allergies:</Text>
+          <Text style={GlobalStyles.label}>Allergies:</Text>
           <TextInput
             style={[GlobalStyles.input]}
             multiline={true}
             numberOfLines={6}
             onChangeText={changeAllergies}
             value={allergies}
-            placeholder="Enter any allergies your child has"
+            placeholder="Enter any allergies your child has..."
           />
 
-          <Text style={styles.label}>Dietary Requirements:</Text>
+          <Text style={GlobalStyles.label}>Dietary Requirements:</Text>
           <TextInput
             style={[GlobalStyles.input]}
             multiline={true}
             numberOfLines={6}
             onChangeText={changeDiet}
             value={diet}
-            placeholder="Enter any dietry requirements that your child has"
+            placeholder="Enter any dietry requirements that your child has..."
           />
 
-          <Text style={styles.label}>Doctor's Contact:</Text>
+          <Text style={GlobalStyles.label}>Doctor's Contact:</Text>
           <TextInput
             style={[GlobalStyles.input]}
             multiline={true}
             numberOfLines={6}
             onChangeText={changeDoctor}
             value={doctor}
-            placeholder="Enter the best way to get in touch with your child's GP"
+            placeholder="Enter the best way to get in touch with your child's GP..."
           />
         </View>
         <Pressable 
           onPress={saveDetailsClicked} 
           style={({pressed}) => [GlobalStyles.buttonPrimary, pressed && GlobalStyles.buttonPrimaryPressed]}
-          >
+        >
             <Text style={GlobalStyles.buttonPrimaryContent}>Save {child ? 'Changes' : 'Details'}</Text>
         </Pressable>
       </View>
@@ -246,13 +254,6 @@ const styles = StyleSheet.create({
     borderRadius: '50%',
   },
 
-  label: {
-    marginBottom: -8,
-    textTransform: 'upperCase',
-    fontWeight: '600',
-    color: '#909090'
-  },
-
   profilePicSection: {
     display: 'flex',
     flexDirection: 'row',
@@ -262,5 +263,9 @@ const styles = StyleSheet.create({
 
   profilePicButtons: {
     flex: 1,
+  },
+
+  datePicker: {
+    alignSelf: 'flex-start',
   }
 })

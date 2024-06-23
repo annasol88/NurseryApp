@@ -81,6 +81,13 @@ export const GlobalStyles = StyleSheet.create({
     fontWeight: 600
   },
 
+  label: {
+    marginBottom: -8,
+    textTransform: 'upperCase',
+    fontWeight: '600',
+    color: '#909090'
+  },
+
   input: {
     borderRadius: 4,
     paddingHorizontal: 12,

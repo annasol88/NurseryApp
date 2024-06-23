@@ -17,14 +17,16 @@ export default function ChildActivityScreen({navigation}) {
     if(currentUser.child) {
       fetchChild(currentUser.child);
     }
-    let childChangeListener = EventRegister.addEventListener('childUpdate', (c) => fetchChild(c.userName))
+    let childChangeListener = EventRegister.addEventListener('childUpdate', fetchChild)
+    let childAbsenceListener = EventRegister.addEventListener('childAbsenceAdded', fetchChild)
     return () => {
       EventRegister.removeEventListener(childChangeListener)
+      EventRegister.removeEventListener(childAbsenceListener)
     }
   }, [])
     
-  fetchChild = (username) => {
-    getChild(username).then((d) => {
+  fetchChild = () => {
+    getChild(currentUser.child).then((d) => {
       changeChildData(d)
     }).catch((e) => {
       console.error(e)

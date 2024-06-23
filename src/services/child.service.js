@@ -1,5 +1,5 @@
 import { setDoc, doc, getDoc } from 'firebase/firestore'; 
-import { uploadString, ref, getDownloadURL } from 'firebase/storage';
+import { uploadString, ref } from 'firebase/storage';
 import { db, storage } from '../firebase/main'
 import { updateUserChild } from './user.service'
 
@@ -56,10 +56,17 @@ export function newChild(username, name, avatarUrl, dob, address, allergies, die
   }
 }
 
+//TODO not working for IOS
 export async function setAvatar(childUserName, avatarFile) {
   const avatarRef = ref(storage, `avatars/child/${childUserName}`);
-  const snapshot = await uploadString(avatarRef, avatarFile, 'data_url')
-  return await getDownloadURL(snapshot.ref);
+
+  if(avatarFile.startsWith('file')) {
+    await avatarRef.putFile(avatarFile)
+  }
+  else {
+    await uploadString(avatarRef, avatarFile, 'data_url')
+  }
+  return await avatarRef.downloadURL(avatarRef);
 }
 
 export async function setChild(childData) {
@@ -67,7 +74,25 @@ export async function setChild(childData) {
   return setDoc(childRef, childData, { merge: true });
 }
 
-export async function addActivity(username) {
-  const ref = doc(db, CHILDREN_PATH, username);
-//ToDo
+export function newAbsence(date, reason) {
+  return {
+    type: 'ABSENCE',
+    date: date,
+    reason: reason
+  }
+}
+
+export async function addActivity(username, activity) {
+  let child = await getChild(username)
+  if(!child) {return Promise.reject('child not found')}
+
+  let alreadyRecorded = child.activities.find(a => {
+    return a.type == 'ABSENCE' && a.date == activity.date
+  })
+
+  if(alreadyRecorded) {
+    return Promise.reject({code:'ABSENCE_ALREADY_RECORDED'})
+  } 
+  child.activities.push(activity)
+  return await setChild(child)
 }
