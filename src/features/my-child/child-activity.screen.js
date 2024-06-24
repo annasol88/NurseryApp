@@ -46,10 +46,10 @@ export default function ChildActivityScreen({navigation}) {
       <View style={[GlobalStyles.container, GlobalStyles.empty]}>
         <Text style={GlobalStyles.emptyText}>No Child Information Saved</Text>
         <Pressable onPress={addChildInfoClicked} style={({pressed}) =>[
-          GlobalStyles.buttonSecondary, 
-          pressed && GlobalStyles.buttonSecondaryPressed
+          GlobalStyles.buttonPrimary, 
+          pressed && GlobalStyles.buttonPrimaryPressed
         ]}>
-          <Text style={GlobalStyles.buttonSecondaryContent}>Add child</Text>
+          <Text style={GlobalStyles.buttonPrimaryContent}>Add child</Text>
         </Pressable>
       </View>
     )

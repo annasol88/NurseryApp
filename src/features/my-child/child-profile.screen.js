@@ -22,7 +22,6 @@ export default function ChildProfileScreen({route, navigation}) {
   let [doctor, changeDoctor] = useState(child?.doctor ?? '')
 
   let [childNameValidation, changeChildNameValidation] = useState('')
-  let [dobValidation, changeDobValidation] = useState('')
   let [addressValidation, changeAddressValidation] = useState('')
 
   let [isLoading, changeLoading] = useState(false);

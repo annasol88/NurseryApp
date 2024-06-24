@@ -34,7 +34,6 @@ export default function ProfileImageCameraScreen({route, navigation}) {
   }
 
   usePictureClicked = () => {
-    //TODO pass more seriaisable obj like locastion or save + location
     route.params.imageSelected(picture.uri);
     navigation.goBack();
   }
