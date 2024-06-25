@@ -102,11 +102,16 @@ export const GlobalStyles = StyleSheet.create({
   },
 
   inputInvalid: {
-    borderColor: '#9b0202',
+    borderColor: '#C20202',
   },
 
   invalidText: {
-    color: '#9b0202',
+    color: '#C20202',
+    flexWrap: 'wrap'
+  },
+
+  successText: {
+    color: '#37872A',
     flexWrap: 'wrap'
   },
 

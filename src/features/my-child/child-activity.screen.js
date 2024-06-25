@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Text, StyleSheet, Pressable, View, Image } from 'react-native';
+import { Text, StyleSheet, Pressable, View, Image, ActivityIndicator } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { EventRegister } from 'react-native-event-listeners';
 
 import { useUserContext } from '../../contexts/user.context';
@@ -17,16 +18,16 @@ export default function ChildActivityScreen({navigation}) {
     if(currentUser.child) {
       fetchChild(currentUser.child);
     }
-    let childChangeListener = EventRegister.addEventListener('childUpdate', fetchChild)
-    let childAbsenceListener = EventRegister.addEventListener('childAbsenceAdded', fetchChild)
+    let childChangeListener = EventRegister.addEventListener('childUpdate', (c) => fetchChild(c.userName))
+    let childAbsenceListener = EventRegister.addEventListener('childAbsenceAdded', () => fetchChild(currentUser.child))
     return () => {
       EventRegister.removeEventListener(childChangeListener)
       EventRegister.removeEventListener(childAbsenceListener)
     }
   }, [])
     
-  fetchChild = () => {
-    getChild(currentUser.child).then((d) => {
+  fetchChild = (username) => {
+    getChild(username).then((d) => {
       changeChildData(d)
     }).catch((e) => {
       console.error(e)
@@ -64,8 +65,8 @@ export default function ChildActivityScreen({navigation}) {
   }
 
   if(isLoading) {
-    return <Text style={GlobalStyles.center}>Loading...</Text>
-  } 
+    return <ActivityIndicator style={GlobalStyles.center} size="large" color="#F85A3E" />
+  }  
   
   if(error) {
     return (
@@ -90,7 +91,17 @@ export default function ChildActivityScreen({navigation}) {
             style={styles.headerAvatar}
             source={{uri: childData.avatarUrl}}
           /> 
-          <Text>{childData.name}</Text>
+          <Text style={styles.headerName}>{childData.name}</Text>
+          <View style={styles.headerItems}>
+            <View style={styles.headerItem}>
+              <MaterialCommunityIcons name="calendar" color={'#F85A3E'} size={20}/>
+              <Text>{childData.dob}</Text>
+            </View>
+            <View style={styles.headerItem}>
+              <MaterialCommunityIcons name="home" color={'#F85A3E'} size={20}/>
+              <Text>{childData.address}</Text>
+            </View>
+          </View>
       </View>
 
       <View style={styles.tab}>
@@ -136,6 +147,32 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: '50%',
+  },
+
+  headerName: {
+    fontWeight: '600',
+    color: '#909090',
+    fontSize: 24,
+  },
+
+  headerItems: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+
+  headerItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+
+  label: {
+    color: '#F85A3E',
+    fontWeight: 600
   },
 
   tab: {

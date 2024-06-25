@@ -1,7 +1,6 @@
 import { setDoc, doc, getDoc } from 'firebase/firestore'; 
-import { uploadString, ref } from 'firebase/storage';
+import { uploadString, ref, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase/main'
-import { updateUserChild } from './user.service'
 
 const ACTIVITY_DATA = [
     {
@@ -56,17 +55,11 @@ export function newChild(username, name, avatarUrl, dob, address, allergies, die
   }
 }
 
-//TODO not working for IOS
+//TODO setup sdk for android and ios
 export async function setAvatar(childUserName, avatarFile) {
   const avatarRef = ref(storage, `avatars/child/${childUserName}`);
-
-  if(avatarFile.startsWith('file')) {
-    await avatarRef.putFile(avatarFile)
-  }
-  else {
-    await uploadString(avatarRef, avatarFile, 'data_url')
-  }
-  return await avatarRef.downloadURL(avatarRef);
+  await uploadString(avatarRef, avatarFile, 'data_url')
+  return await getDownloadURL(avatarRef);
 }
 
 export async function setChild(childData) {

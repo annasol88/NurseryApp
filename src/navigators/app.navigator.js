@@ -9,7 +9,6 @@ export default function AppNavigator() {
   const Stack = createNativeStackNavigator();
   const {currentUser} = useUserContext()
 
-
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {!currentUser ? (

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Text } from 'react-native'
+import { ActivityIndicator } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native';
 
 import AppNavigator from './src/navigators/app.navigator';
@@ -35,10 +35,8 @@ export default function App() {
   }
 
   if(isLoading) {
-    return (
-      <Text style={GlobalStyles.center}>Loading...</Text>
-    )
-  }
+    return <ActivityIndicator style={GlobalStyles.center} size="large" color="#F85A3E" />
+  } 
 
   return (
     <UserProvider value={{currentUser}}>

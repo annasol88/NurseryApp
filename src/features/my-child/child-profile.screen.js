@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { View, Text, Image, Pressable, TextInput, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, Image, Pressable, TextInput, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { EventRegister } from 'react-native-event-listeners';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { LogBox } from 'react-native';
 
 import { useUserContext } from '../../contexts/user.context';
 import { GlobalStyles } from '../../../styles/shared.styles';
@@ -22,11 +23,15 @@ export default function ChildProfileScreen({route, navigation}) {
   let [doctor, changeDoctor] = useState(child?.doctor ?? '')
 
   let [childNameValidation, changeChildNameValidation] = useState('')
-  let [dobValidation, changeDobValidation] = useState('')
   let [addressValidation, changeAddressValidation] = useState('')
 
   let [isLoading, changeLoading] = useState(false);
   let [error, changeError] = useState(false);
+
+  // can safely ignore warning because deep link and state persistence is not used
+  LogBox.ignoreLogs([
+    'Non-serializable values were found in the navigation state',
+  ]);
 
   takeImageClicked = () => {
     navigation.navigate('Take Profile Image', {
@@ -69,14 +74,11 @@ export default function ChildProfileScreen({route, navigation}) {
     //let usernameChange = childName != child?.childName
     
     let avatarChange = avatarUrl != '' && avatarUrl != child?.avatarUrl
-    let childData 
-    if(avatarChange) {
-      storedAvatarUrl = await setAvatar(child.userName, avatarUrl)
-      childData = newChild(child.userName, childName, storedAvatarUrl, dob.toDateString(), address, allergies, diet, doctor)
-    } else {
-      // avatarUrl already contains existing link to child profile photo if not changed
-      childData = newChild(child.userName, childName, avatarUrl, dob.toDateString(), address, allergies, diet, doctor)
-    }
+    let dobChange = dob != child?.dob
+    let avatarUrlToSave = avatarChange ? await setAvatar(child.userName, avatarUrl) : avatarUrl
+    let dobToSave = dobChange ? dob.toDateString() : dob
+
+    childData = newChild(child.userName, childName, avatarUrlToSave, dobToSave, address, allergies, diet, doctor)
 
     setChild(childData).then(() => {
       EventRegister.emit('childUpdate', childData)
@@ -102,7 +104,7 @@ export default function ChildProfileScreen({route, navigation}) {
   }
 
   if(isLoading) {
-    return <Text style={GlobalStyles.center}>Loading...</Text>
+    return <ActivityIndicator style={GlobalStyles.center} size="large" color="#F85A3E" />
   } 
   
   if(error) {

@@ -15,9 +15,11 @@ export default function RootNavigator() {
     <Tab.Navigator initialRouteName="NewsFeedNav" screenOptions={{ headerShown: false }}>
       <Tab.Screen 
         name="NewsFeedNav" 
-        component={HomeNavigator} 
+        component={HomeNavigator}
         options={{
           tabBarLabel: 'News Feed',
+          tabBarActiveTintColor:'#F85A3E',
+          tabBarInactiveTintColor:'#EFEFEF',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="home" color={color} size={size} />
           ),
@@ -30,6 +32,8 @@ export default function RootNavigator() {
           component={ChildrenAdminNavigator}
           options={{
             tabBarLabel: 'Children',
+            tabBarActiveTintColor:'#F85A3E',
+            tabBarInactiveTintColor:'#EFEFEF',
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="account-group" color={color} size={size} />
             ),
@@ -41,6 +45,8 @@ export default function RootNavigator() {
           component={MyChildrenNavigator}
           options={{
             tabBarLabel: 'My Child',
+            tabBarActiveTintColor:'#F85A3E',
+            tabBarInactiveTintColor:'#EFEFEF',
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="baby-face" color={color} size={size} />
             ),
@@ -53,6 +59,8 @@ export default function RootNavigator() {
         component={SettingsNavigator}
         options={{
           tabBarLabel: 'Settings',
+          tabBarActiveTintColor:'#F85A3E',
+          tabBarInactiveTintColor:'#EFEFEF',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="cog" color={color} size={size} />
           ),

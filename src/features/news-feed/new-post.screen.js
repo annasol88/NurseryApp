@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TextInput, Pressable, Text, View, StyleSheet } from "react-native";
+import { TextInput, Pressable, Text, View, StyleSheet, ActivityIndicator } from "react-native";
 import { EventRegister } from 'react-native-event-listeners'
 
 import { GlobalStyles } from "../../../styles/shared.styles";
@@ -40,7 +40,7 @@ export default function NewPostScreen({navigation}) {
   }
 
   if(isLoading) {
-    return <Text style={GlobalStyles.center}>Loading...</Text>
+    return <ActivityIndicator style={GlobalStyles.center} size="small" color="#F85A3E" />
   } 
   
   if(error) {

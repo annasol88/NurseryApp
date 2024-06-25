@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Text, View, TextInput, Pressable, StyleSheet } from 'react-native';
+import { Text, View, TextInput, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { EventRegister } from 'react-native-event-listeners';
 
@@ -50,7 +50,7 @@ export default function ReportAbsenceScreen({route, navigation}) {
   }
 
   if(isLoading) {
-    return <Text style={GlobalStyles.center}>Loading...</Text>
+    return <ActivityIndicator style={GlobalStyles.center} size="large" color="#F85A3E" />
   } 
   
   if(error) {
@@ -86,14 +86,14 @@ export default function ReportAbsenceScreen({route, navigation}) {
         { validationMessage && 
           <Text style={GlobalStyles.invalidText}>{validationMessage}</Text>
         }
-      </View>
 
-      <Pressable 
-        onPress={saveAbsenceClicked} 
-        style={({pressed}) => [GlobalStyles.buttonPrimary, pressed && GlobalStyles.buttonPrimaryPressed]}
-        >
-          <Text style={GlobalStyles.buttonPrimaryContent}>Save Absence</Text>
-      </Pressable>
+        <Pressable 
+          onPress={saveAbsenceClicked} 
+          style={({pressed}) => [GlobalStyles.buttonPrimary, pressed && GlobalStyles.buttonPrimaryPressed]}
+          >
+            <Text style={GlobalStyles.buttonPrimaryContent}>Save Absence</Text>
+        </Pressable>
+      </View>
     </View>
   )
 }

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { StyleSheet, Text, Pressable, View, Image } from 'react-native';
+import { StyleSheet, Text, Pressable, View, Image, ActivityIndicator } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 
 import { GlobalStyles } from '../../../styles/shared.styles';
@@ -34,8 +34,7 @@ export default function ProfileImageCameraScreen({route, navigation}) {
   }
 
   usePictureClicked = () => {
-    //TODO pass more seriaisable obj like locastion or save + location
-    route.params.imageSelected(picture.uri);
+    route.params(picture.base64);
     navigation.goBack();
   }
 
@@ -67,7 +66,7 @@ export default function ProfileImageCameraScreen({route, navigation}) {
 
   takePicture = () => {
     changeIsLoading(true)
-    cameraRef.current.takePictureAsync().then((pic)=> {
+    cameraRef.current.takePictureAsync({base64: true}).then((pic)=> {
       changeIsLoading(false)
       changePicture(pic)
     })
@@ -78,7 +77,7 @@ export default function ProfileImageCameraScreen({route, navigation}) {
     <View style={styles.container}>
       <CameraView style={styles.camera} facing={facing} flash={flash} ref={cameraRef}>
         { isLoading && 
-          <Text style={styles.loading}>Loading..</Text>
+          <ActivityIndicator style={GlobalStyles.center} size="large" color="#F85A3E" />
         }
         <View style={styles.footerPanel}>
           <Pressable style={styles.shutter} onPress={takePicture}></Pressable>
@@ -89,7 +88,7 @@ export default function ProfileImageCameraScreen({route, navigation}) {
             </Pressable>
             
             <Pressable onPress={toggleFlash}>
-              <Text style={styles.text} onPress={toggleFlash}>Use flash</Text>
+              <Text style={styles.text} onPress={toggleFlash}>flash {!flash}</Text>
             </Pressable>
           </View>
         </View>
@@ -108,7 +107,9 @@ const styles = StyleSheet.create({
   },
 
   loading: {
-    justifySelf: 'centrer'
+    justifySelf: 'center',
+    alignSelf: 'center',
+    height: '100%'
   },
 
   footerPanel: {

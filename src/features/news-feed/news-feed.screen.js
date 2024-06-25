@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { FlatList, Text, View, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { FlatList, Text, View, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
 import { EventRegister } from 'react-native-event-listeners'
 
 import Post from '../../components/post.component';
@@ -57,7 +57,7 @@ export default function NewsFeedScreen({navigation}) {
   }
 
   if(isLoading) {
-    return <Text style={GlobalStyles.center}>Loading...</Text>
+    return <ActivityIndicator style={GlobalStyles.center} size="large" color="#F85A3E" />
   } 
   
   if(error) {
