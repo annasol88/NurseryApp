@@ -16,7 +16,7 @@ export default function ChildProfileScreen({route, navigation}) {
 
   let [childName, changeChildName] = useState(child?.name ?? '')
   let [avatarUrl, changeAvatar] = useState(child?.avatarUrl ?? undefined)
-  let [dob, changeDob] = useState(child?.dob ?? new Date())
+  let [dob, changeDob] = useState(new Date(child?.dob) ?? new Date())
   let [address, changeAddress] = useState(child?.address ?? '')
   let [allergies, changeAllergies] = useState(child?.allergies ?? '')
   let [diet, changeDiet] = useState(child?.diet ?? '')
@@ -135,7 +135,7 @@ export default function ChildProfileScreen({route, navigation}) {
                   pressed && GlobalStyles.buttonSecondaryPressed
               ]}
               >
-                <MaterialCommunityIcons name="camera" size={16} color={'#F85A3E'}></MaterialCommunityIcons>
+                <MaterialCommunityIcons name="camera" size={16} color={'#F85A3E'}/>
                 <Text style={[GlobalStyles.buttonSecondaryContent, GlobalStyles.indent]}>
                   Take Image
                 </Text>
@@ -147,7 +147,7 @@ export default function ChildProfileScreen({route, navigation}) {
                   pressed && GlobalStyles.buttonSecondaryPressed
               ]}
               >
-                <MaterialCommunityIcons name="upload" size={16} color={'#F85A3E'}></MaterialCommunityIcons>
+                <MaterialCommunityIcons name="upload" size={16} color={'#F85A3E'}/>
                 <Text style={[GlobalStyles.buttonSecondaryContent, GlobalStyles.indent]}>
                     Upload Image
                 </Text>
