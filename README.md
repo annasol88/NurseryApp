@@ -1,19 +1,10 @@
-USERS
-- email
-- avatar
-- role
-- children [name, name]
+# Running the App
 
-CHILREN 
-...info
-activities []
+# Implementation Decisions
 
+- inline styles for reusability and managable for the size of project
+- folder structure
 
-stuff::
-PRESSABLE:
-<Pressable onPress={login} style={({pressed}) =>[
-GlobalStyles.buttonPrimary, 
-pressed && GlobalStyles.buttonPrimaryPressed
-]}>
-<Text style={GlobalStyles.buttonPrimaryContent}>Login</Text>
-</Pressable>
+- not compatible for web becoz...
+    - async storage
+    - image upload 

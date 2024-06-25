@@ -1,5 +1,9 @@
 import { setDoc, doc, getDoc } from 'firebase/firestore'; 
+<<<<<<< HEAD
 import { ref, uploadBytes, uploadString } from 'firebase/storage';
+=======
+import { uploadString, ref, getDownloadURL } from 'firebase/storage';
+>>>>>>> f9d50ad85a7a4125e072ac2e8572d62b8c462763
 import { db, storage } from '../firebase/main'
 
 const ACTIVITY_DATA = [
@@ -55,15 +59,10 @@ export function newChild(username, name, avatarUrl, dob, address, allergies, die
   }
 }
 
-//setup ios and android sdk
 export async function setAvatar(childUserName, avatarFile) {
-  console.log(avatarFile)
-  const avatarRef = ref(storage, `avatars/child/${childUserName}`)
-  let snapshot = await uploadString(avatarRef, avatarFile, 'data_url')
-  return await getDownloadURL(snapshot.ref);
-  // await avatarRef.putFile(avatarFile)
-  // return await avatarRef.getDownloadURL(avatarRef);
-  
+  const avatarRef = ref(storage, `avatars/child/${childUserName}`);
+  await uploadString(avatarRef, avatarFile, 'data_url')
+  return await getDownloadURL(avatarRef);
 }
 
 export async function setChild(childData) {

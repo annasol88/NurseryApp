@@ -50,22 +50,18 @@ export default function SignUpScreen({navigation}) {
     password2InvalidChange(false)
 
     if(email == '') {
-        validationMessageChange('Email not provided')
-        emailInvalidChange(true)
-        return false
+      validationMessageChange('Email not provided')
+      emailInvalidChange(true)
+      return false
     } else if(password == '') {
-        validationMessageChange('Password not provided.')
-        passwordInvalidChange(true)
-        return false
-    } else if(password2 == '') {
-        validationMessageChange('Password not provided.')
-        password2InvalidChange(true)
-        return falseelse 
+      validationMessageChange('Password not provided.')
+      passwordInvalidChange(true)
+      return false
     } else if(password != password2) {
-        validationMessageChange('Passwords entered do not match.')
-        passwordInvalidChange(true)
-        password2InvalidChange(true)
-        return false
+      validationMessageChange('Passwords entered do not match.')
+      passwordInvalidChange(true)
+      password2InvalidChange(true)
+      return false
     }
     return true
   }
@@ -87,7 +83,6 @@ export default function SignUpScreen({navigation}) {
         onChangeText={passwordChange}
         placeholder="Create Password"
         inputMode="default"
-        textContentType="password"
         secureTextEntry={true}
       />
       <TextInput

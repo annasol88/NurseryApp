@@ -7,7 +7,7 @@ export default function ChildrenAdminNavigator() {
 
   return (
     <Stack.Navigator>
-      <Stack.Screen name="My Children" component={ChildrenAdminScreen} />
+      <Stack.Screen name="Children Admin" component={ChildrenAdminScreen} />
     </Stack.Navigator>
   )
 }
