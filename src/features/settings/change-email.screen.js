@@ -1,23 +1,26 @@
 import { useState } from "react";
 import { TextInput, Pressable, Text, View, ActivityIndicator, ScrollView } from "react-native";
-import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import { updateEmail, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import { EventRegister } from 'react-native-event-listeners'
 
 import { GlobalStyles } from '../../../styles/shared.styles';
 import { auth } from '../../firebase/main'
+import { useUserContext } from '../../contexts/user.context';
+import { updateUserEmail } from '../../services/user.service'
 
-export default function ChangePasswordScreen({navigation}) {
-  let [currentPassword, changeCurrentPassword] = useState('');
+export default function ChangeEmailScreen() {
+  let {currentUser} = useUserContext()
+
+  let [email, changeEmail] = useState(currentUser.email);
   let [password, changePassword] = useState('');
-  let [password2, changePassword2] = useState('');
 
   let [isLoading, changeLoading] = useState(false);
   let [error, changeError] = useState(false);
   let [success, changeSuccess] = useState(false);
 
   let [validationMessage, changeValidationMessage] = useState('');
-  let [currentPasswordInvalid, changeCurrentPasswordInvalid] = useState(false);
+  let [emailInvalid, changeEmailInvalid] = useState(false);
   let [passwordInvalid, changePasswordInvalid] = useState(false);
-  let [password2Invalid, changePassword2Invalid] = useState(false);
 
   saveClicked = async () => {
     if(!validate()) { return }
@@ -25,55 +28,50 @@ export default function ChangePasswordScreen({navigation}) {
 
     const credential = EmailAuthProvider.credential(
       auth.currentUser.email,
-      currentPassword
+      password
     )
 
     try {
       await reauthenticateWithCredential(auth.currentUser, credential)
-      await updatePassword(auth.currentUser, password)
+      await updateEmail(auth.currentUser, email)
+      await updateUserEmail(currentUser.email, email)
       changeSuccess(true)
+      EventRegister.emit('userUpdate', currentUser)
 
       setTimeout(()=> {
         changeSuccess(false)
       }, 5000)
     } catch(e) {
-      switch(error.code) {
+      switch(e.code) {
         case 'auth/invalid-credential':
           changeValidationMessage('Incorrect Password entered.')
-          changeCurrentPasswordInvalid(true);
+          changePasswordInvalid(true);
+          break;
+        case 'email-already-in-use':
+          changeValidationMessage('An account with this email already exists.')
+          changeEmailInvalid(true)
           break;
         default: 
           changeError(true)
-          console.error(error)
+          console.error(e)
           break;
       }
     } finally {
       changeLoading(false)
-    }  
+    }
   }
   
   validate = () => {
     changeValidationMessage('')
     changePasswordInvalid(false)
-    changePassword2Invalid(false)
-    changeCurrentPasswordInvalid(false)
 
-    if(currentPassword == '') {
-      changeValidationMessage('Password not provided.')
-      changeCurrentPasswordInvalid(true)
+    if(email == '') {
+      changeValidationMessage('Email not provided.')
+      changeEmailInvalid(true)
       return false
     } else if(password == '') {
-      changeValidationMessage('New Password not provided.')
+      changeValidationMessage('Password not provided. We need this to authenticate you')
       changePasswordInvalid(true)
-      return false
-    } else if(password.length < 6) {
-      changeValidationMessage('Weak password. Password must be at least 6 characters long.')
-      changePasswordInvalid(true)
-      return false
-  } else if(password != password2) {
-      changeValidationMessage('Passwords entered do not match.')
-      changePasswordInvalid(true)
-      changePassword2Invalid(true)
       return false
     }
     return true
@@ -86,7 +84,7 @@ export default function ChangePasswordScreen({navigation}) {
   if(error) {
     return (
       <View style={[GlobalStyles.container, GlobalStyles.empty]}>
-        <Text style={GlobalStyles.emptyText}>Something went wrong updating your password. Please try again later</Text>
+        <Text style={GlobalStyles.emptyText}>Something went wrong updating your email address. Please try again later.</Text>
       </View>
     )
   } 
@@ -94,7 +92,7 @@ export default function ChangePasswordScreen({navigation}) {
   if(success) {
     return (
       <View style={[GlobalStyles.container, GlobalStyles.empty]}>
-        <Text style={[GlobalStyles.emptyText, GlobalStyles.successText]}>Password Updated Successfully!</Text>
+        <Text style={[GlobalStyles.emptyText, GlobalStyles.successText]}>Email Updated Successfully!</Text>
       </View>
     )
   } 
@@ -103,26 +101,19 @@ export default function ChangePasswordScreen({navigation}) {
     <ScrollView automaticallyAdjustKeyboardInsets={true}>
       <View style={GlobalStyles.screen}>
         <View style={GlobalStyles.container}>
-        <Text style={GlobalStyles.label}>Enter Current Password:</Text>
+          <Text style={GlobalStyles.label}>Enter New Email:</Text>
           <TextInput
-            style={[GlobalStyles.input, currentPasswordInvalid && GlobalStyles.inputInvalid]}
-            onChangeText={changeCurrentPassword}
-            placeholder="Enter current password."
-            secureTextEntry={true}
+            style={[GlobalStyles.input, emailInvalid && GlobalStyles.inputInvalid]}
+            onChangeText={changeEmail}
+            value={email}
+            placeholder="Enter a new email address for this account."
           />
 
-          <Text style={GlobalStyles.label}>Enter New Password:</Text>
+          <Text style={GlobalStyles.label}>Enter password:</Text>
           <TextInput
             style={[GlobalStyles.input, passwordInvalid && GlobalStyles.inputInvalid]}
             onChangeText={changePassword}
-            placeholder="Enter new password."
-            secureTextEntry={true}
-          />
-
-          <TextInput
-            style={[GlobalStyles.input, password2Invalid && GlobalStyles.inputInvalid]}
-            onChangeText={changePassword2}
-            placeholder="Re-enter new password."
+            placeholder="Enter password associated with this email."
             secureTextEntry={true}
           />
 

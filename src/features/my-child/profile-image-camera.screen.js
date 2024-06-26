@@ -34,7 +34,6 @@ export default function ProfileImageCameraScreen({route, navigation}) {
   }
 
   usePictureClicked = () => {
-    // route.params.imageSelected(`data:image/jpg;base64,${picture.base64}`);
     route.params.imageSelected(picture.uri);
     navigation.goBack();
   }
@@ -89,7 +88,7 @@ export default function ProfileImageCameraScreen({route, navigation}) {
             </Pressable>
             
             <Pressable onPress={toggleFlash}>
-              <Text style={styles.text} onPress={toggleFlash}>flash {!flash}</Text>
+              <Text style={styles.text} onPress={toggleFlash}>{flash== 'on' ? 'Flash off': 'Flash on'}</Text>
             </Pressable>
           </View>
         </View>

@@ -6,8 +6,12 @@ import { GlobalStyles } from '../../../styles/shared.styles';
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 export default function SettingsScreen({navigation}) {
-  viewPersonalDetailsClicked = () => {
+  personalDetailsClicked = () => {
     navigation.navigate('Personal Details')
+  }
+
+  changeEmailClicked = () => {
+    navigation.navigate('Change Email')
   }
 
   changePasswordClicked = () => {
@@ -22,8 +26,8 @@ export default function SettingsScreen({navigation}) {
 
   return (
     <View style={GlobalStyles.list}>
-      <Pressable onPress={viewPersonalDetailsClicked} style={({pressed}) => [GlobalStyles.listItem, pressed && GlobalStyles.pressed]}> 
-        <Text>Update personal details</Text> 
+      <Pressable onPress={changeEmailClicked} style={({pressed}) => [GlobalStyles.listItem, pressed && GlobalStyles.pressed]}> 
+        <Text>Update email</Text> 
         <MaterialCommunityIcons name="chevron-right" size={24}></MaterialCommunityIcons>
       </Pressable>
 
@@ -31,6 +35,12 @@ export default function SettingsScreen({navigation}) {
         <Text>Update password</Text> 
         <MaterialCommunityIcons name="chevron-right" size={24}></MaterialCommunityIcons>
       </Pressable>
+
+      <Pressable onPress={personalDetailsClicked} style={({pressed}) => [GlobalStyles.listItem, pressed && GlobalStyles.pressed]}> 
+        <Text>Update personal details</Text> 
+        <MaterialCommunityIcons name="chevron-right" size={24}></MaterialCommunityIcons>
+      </Pressable>
+
       <Pressable onPress={signOutClicked} style={({pressed}) => [GlobalStyles.listItem, pressed && GlobalStyles.pressed]}> 
         <Text>Sign out</Text> 
         <MaterialCommunityIcons name="chevron-right" size={24}></MaterialCommunityIcons>

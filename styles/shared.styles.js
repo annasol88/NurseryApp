@@ -160,5 +160,10 @@ export const LoginStyles = StyleSheet.create({
 
   invalidText: {
     width: '70%'
+  },
+
+  logo: {
+    width: 150,
+    height: 150
   }
 })

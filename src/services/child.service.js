@@ -1,28 +1,6 @@
 import { setDoc, doc, getDoc } from 'firebase/firestore'; 
-import { uploadString, uploadBytes, ref, getDownloadURL } from 'firebase/storage';
+import { uploadBytes, ref, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase/main'
-
-const ACTIVITY_DATA = [
-    {
-        type: 'ABSENT',
-        date: new Date(),
-        reason: 'fever'
-    },
-    {
-        type: 'PRESENT',
-        date: new Date(),
-        signIn: new Date(),
-        signOut: new Date(),
-        meals: ['pesto pasta', 'oat cakes']
-    },
-    {
-        type: 'PRESENT',
-        date: new Date(),
-        signIn: new Date(),
-        signOut: new Date(),
-        meals: ['pesto pasta', 'oat cakes']
-    }
-]
 
 const CHILDREN_PATH = 'children'
 
@@ -78,10 +56,15 @@ export function newAbsence(date, reason) {
 
 export async function addActivity(username, activity) {
   let child = await getChild(username)
-  if(!child) {return Promise.reject('child not found')}
+  if(!child) {
+    return Promise.reject('child not found')
+  }
+
+  console.log(activity.date)
+  console.log(child.activities)
 
   let alreadyRecorded = child.activities.find(a => {
-    return a.type == 'ABSENCE' && a.date == activity.date
+    return a.date == activity.date
   })
 
   if(alreadyRecorded) {

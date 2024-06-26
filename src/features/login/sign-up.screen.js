@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, TextInput, Pressable, Text } from 'react-native';
+import { View, TextInput, Pressable, Text, Image } from 'react-native';
 import { GlobalStyles, LoginStyles } from '../../../styles/shared.styles';
 import { auth } from '../../firebase/main'
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -72,6 +72,10 @@ export default function SignUpScreen({navigation}) {
   
   return (
     <View style={LoginStyles.screen}>
+      <Image
+        style={LoginStyles.logo}
+        source={require('../../../assets/rainbow.png')}
+      /> 
       <TextInput
         style={[GlobalStyles.input, LoginStyles.input, emailInvalid && GlobalStyles.inputInvalid]}
         onChangeText={emailChange}

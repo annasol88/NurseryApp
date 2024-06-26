@@ -30,7 +30,7 @@ export default function ReportAbsenceScreen({route, navigation}) {
       navigation.goBack();
     }).catch(e => {
       if(e.code == 'ABSENCE_ALREADY_RECORDED') {
-        changeValidationMessage('Absence for this date is already recorded.')
+        changeValidationMessage('Absence or presence for this date has already been recorded. Please Verify you have selcted the correct date')
         return
       }
       changeError(true)

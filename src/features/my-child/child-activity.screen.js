@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Text, StyleSheet, Pressable, View, Image, ActivityIndicator } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { EventRegister } from 'react-native-event-listeners';
+import { Text, StyleSheet, Pressable, View, Image, ActivityIndicator, ScrollView, FlatList} from 'react-native'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { EventRegister } from 'react-native-event-listeners'
 
-import { useUserContext } from '../../contexts/user.context';
+import { useUserContext } from '../../contexts/user.context'
 import { GlobalStyles } from '../../../styles/shared.styles'
 import { getChild } from '../../services/child.service'
+import Activity from '../../components/activity.component'
 
 export default function ChildActivityScreen({navigation}) {
   let {currentUser} = useUserContext()
@@ -37,8 +38,16 @@ export default function ChildActivityScreen({navigation}) {
     })
   }
 
-  addChildInfoClicked = () => {
-    navigation.navigate('Child Profile', {child: undefined})
+  displayAvater = () => {
+    return childData.avatarUrl ? {uri: childData.avatarUrl} : require('../../../assets/empty-avatar.png')
+  }
+
+  viewChildInfoClicked = () => {
+    navigation.navigate('Child Profile', {child: childData})
+  }
+
+  reportAbsenceClicked = () => {
+    navigation.navigate('Report Absence')
   }
 
   // if user has not uploaded chld information
@@ -46,7 +55,7 @@ export default function ChildActivityScreen({navigation}) {
     return (
       <View style={[GlobalStyles.container, GlobalStyles.empty]}>
         <Text style={GlobalStyles.emptyText}>No Child Information Saved</Text>
-        <Pressable onPress={addChildInfoClicked} style={({pressed}) =>[
+        <Pressable onPress={viewChildInfoClicked} style={({pressed}) =>[
           GlobalStyles.buttonPrimary, 
           pressed && GlobalStyles.buttonPrimaryPressed
         ]}>
@@ -54,14 +63,6 @@ export default function ChildActivityScreen({navigation}) {
         </Pressable>
       </View>
     )
-  }
-
-  reportAbsenceClicked = () => {
-    navigation.navigate('Report Absence')
-  }
-
-  viewChildInfoClicked = () => {
-    navigation.navigate('Child Profile', {child: childData})
   }
 
   if(isLoading) {
@@ -85,54 +86,61 @@ export default function ChildActivityScreen({navigation}) {
   }
 
   return (
-    <View style={GlobalStyles.screen}>
-      <View style={[GlobalStyles.container, styles.header]}>
-          <Image
-            style={styles.headerAvatar}
-            source={{uri: childData.avatarUrl}}
-          /> 
-          <Text style={styles.headerName}>{childData.name}</Text>
-          <View style={styles.headerItems}>
-            <View style={styles.headerItem}>
-              <MaterialCommunityIcons name="calendar" color={'#F85A3E'} size={20}/>
-              <Text>{childData.dob}</Text>
+    <ScrollView automaticallyAdjustKeyboardInsets={true}>
+      <View style={GlobalStyles.screen}>
+        <View style={[GlobalStyles.container, styles.header]}>
+            <Image
+              style={styles.headerAvatar}
+              source={displayAvater()}
+            /> 
+            <Text style={styles.heading}>{childData.name}</Text>
+
+            <View style={styles.headerItems}>
+              <View style={styles.headerItem}>
+                <MaterialCommunityIcons name="calendar" color={'#F85A3E'} size={20}/>
+                <Text>{childData.dob}</Text>
+              </View>
+              <View style={styles.headerItem}>
+                <MaterialCommunityIcons name="account" color={'#F85A3E'} size={20}/>
+                <Text>@{childData.userName}</Text>
+              </View>
             </View>
-            <View style={styles.headerItem}>
-              <MaterialCommunityIcons name="home" color={'#F85A3E'} size={20}/>
-              <Text>{childData.address}</Text>
-            </View>
+        </View>
+
+        <View style={styles.tab}>
+          <Pressable 
+            onPress={reportAbsenceClicked} style={({pressed}) => [
+              styles.tabButton, 
+              pressed && GlobalStyles.buttonSecondaryPressed]}
+          > 
+            <Text style={GlobalStyles.buttonSecondaryContent}>Report Absence</Text>
+          </Pressable>
+
+          <Pressable 
+            onPress={viewChildInfoClicked} style={({pressed}) => [
+              styles.tabButton, 
+              pressed && GlobalStyles.buttonSecondaryPressed]}
+          > 
+            <Text style={GlobalStyles.buttonSecondaryContent}>View Profile</Text>
+          </Pressable>
+        </View>
+
+        <Text style={[styles.heading, GlobalStyles.center]}>
+          {childData.name}'s Record
+        </Text>
+
+        { childData.activities?.length > 0 ? (
+          <FlatList
+            data={childData.activities}
+            renderItem={({item}) => {return <Activity activityData={item} />}}
+          />
+        ) : (
+          <View style={[GlobalStyles.container, GlobalStyles.empty]}>
+            <Text style={GlobalStyles.emptyText}>No Activities Reported</Text>
           </View>
+        )}
       </View>
-
-      <View style={styles.tab}>
-        <Pressable 
-          onPress={reportAbsenceClicked} style={({pressed}) => [
-            styles.tabButton, 
-            pressed && GlobalStyles.buttonSecondaryPressed]}
-        > 
-          <Text style={GlobalStyles.buttonSecondaryContent}>Report Absence</Text>
-        </Pressable>
-
-        <Pressable 
-          onPress={viewChildInfoClicked} style={({pressed}) => [
-            styles.tabButton, 
-            pressed && GlobalStyles.buttonSecondaryPressed]}
-        > 
-          <Text style={GlobalStyles.buttonSecondaryContent}>View Profile</Text>
-        </Pressable>
-      </View>
-
-      { childData.activities?.length > 0 ? (
-        <View>
-          <Text>activities go here</Text>
-        </View>
-      ) : (
-        <View style={[GlobalStyles.container, GlobalStyles.empty]}>
-          <Text style={GlobalStyles.emptyText}>No Activities Reported</Text>
-        </View>
-      )
-      }
-    </View>
+    </ScrollView>
   );
   
 }
@@ -149,10 +157,11 @@ const styles = StyleSheet.create({
     borderRadius: '50%',
   },
 
-  headerName: {
+  heading: {
+    textTransform: 'capitalize',
     fontWeight: '600',
     color: '#909090',
-    fontSize: 24,
+    fontSize: 20,
   },
 
   headerItems: {

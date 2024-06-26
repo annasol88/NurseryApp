@@ -3,12 +3,13 @@ import { View, Text, Image, Pressable, TextInput, StyleSheet, ScrollView, Activi
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { EventRegister } from 'react-native-event-listeners';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker';
 import { LogBox } from 'react-native';
 
 import { useUserContext } from '../../contexts/user.context';
 import { GlobalStyles } from '../../../styles/shared.styles';
 import { generateUserName, newChild, setChild, setAvatar } from '../../services/child.service';
-import { updateUserChild } from '../../services/user.service'
+import { setUser } from '../../services/user.service'
 
 export default function ChildProfileScreen({route, navigation}) {
   const {child} = route.params;
@@ -28,6 +29,10 @@ export default function ChildProfileScreen({route, navigation}) {
   let [isLoading, changeLoading] = useState(false);
   let [error, changeError] = useState(false);
 
+  displayAvater = () => {
+    return avatarUrl ? {uri: avatarUrl} : require('../../../assets/empty-avatar.png')
+  }
+
   // can safely ignore warning because deep link and state persistence is not used
   LogBox.ignoreLogs([
     'Non-serializable values were found in the navigation state',
@@ -39,8 +44,18 @@ export default function ChildProfileScreen({route, navigation}) {
     });
   }
 
-  uploadImageClicked = () => {
-    console.log('upload image')
+  uploadImageClicked = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await launchImageLibraryAsync({
+      mediaTypes: MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      changeAvatar(result.assets[0].uri);
+    }
   }
 
   saveDetailsClicked = async () => {
@@ -57,7 +72,7 @@ export default function ChildProfileScreen({route, navigation}) {
       let childData = newChild(childUserName, childName, storedAvatarUrl, dob.toDateString(), address, allergies, diet, doctor)
 
       let setChildComplete = setChild(childData)
-      let updateUserComplete = updateUserChild(currentUser.email, childUserName)
+      let updateUserComplete = setUser(currentUser.email, { child: childUserName })
 
       Promise.all([setChildComplete, updateUserComplete]).then(() => {
         EventRegister.emit('childUpdate', childData)
@@ -124,7 +139,7 @@ export default function ChildProfileScreen({route, navigation}) {
             { avatarUrl && 
               <Image
                 style={styles.avatar}
-                source={{uri: avatarUrl}}
+                source={displayAvater()}
               /> 
             }
             <View style={styles.profilePicButtons}>
@@ -188,8 +203,6 @@ export default function ChildProfileScreen({route, navigation}) {
           <Text style={GlobalStyles.label}>Address:</Text>
           <TextInput
             style={[GlobalStyles.input, addressValidation && GlobalStyles.inputInvalid]}
-            multiline={true}
-            numberOfLines={6}
             onChangeText={changeAddress}
             value={address}
             placeholder="Enter Your Address..."

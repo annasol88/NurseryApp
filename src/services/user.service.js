@@ -1,14 +1,13 @@
-import { collection, getDoc, setDoc, updateDoc, doc, where, query } from 'firebase/firestore'; 
+import { deleteDoc, getDoc, setDoc, doc } from 'firebase/firestore'; 
 import { db } from '../firebase/main'
 
 const USER_PATH = 'users'
 
 export async function createUser(userEmail) {
-  const usersRef = collection(db, USER_PATH);
   // user email is used as path because this is taken from auth so will always be unique 
-  return setDoc(doc(usersRef, userEmail), {
+  return setUser(userEmail, {
     email: userEmail,
-    // only parent accounts can be created through app for security purposes
+    // currently only parents can be created through the app
     role: 'PARENT',
   });
 }
@@ -23,7 +22,24 @@ export async function getUser(userEmail) {
   return Promise.resolve(undefined)
 }
 
-export async function updateUserChild(userEmail, chilUserName) {
-  const ref = doc(db, USER_PATH, userEmail);
-  return setDoc(ref, { child: chilUserName }, { merge: true });
+export async function updateUserEmail(currentEmail, newEmail) {
+  let userData = await getUser(currentEmail)
+
+  if(!userData) { 
+    return Promise.reject('User not found')
+  }
+
+  userData.email = newEmail
+
+  await setUser(newEmail, userData)
+  await deleteDoc(doc(db, USER_PATH, currentEmail));
+  // TODO update child username 
+  // update child in DB with new username 
+  // update posts 
+  // update post likes
+}
+
+export async function setUser(email, data) {
+  const ref = doc(db, USER_PATH, email);
+  return setDoc(ref, data, { merge: true });
 }
