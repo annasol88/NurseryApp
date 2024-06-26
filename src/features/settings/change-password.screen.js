@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { TextInput, Pressable, Text, View, ActivityIndicator } from "react-native";
-import { updatePassword } from 'firebase/auth';
+import { updatePassword, reauthenticateWithCredential } from 'firebase/auth';
 
 import { GlobalStyles } from '../../../styles/shared.styles';
 import { auth } from '../../firebase/main'
 
 export default function ChangePasswordScreen({navigation}) {
+  let [currentPassword, changeCurrentPassword] = useState('');
   let [password, changePassword] = useState('');
   let [password2, changePassword2] = useState('');
 
@@ -22,28 +23,45 @@ export default function ChangePasswordScreen({navigation}) {
     if(!validate()) { return }
     changeLoading(true)
 
-    //TODO add reauthentication with password input
-    updatePassword(auth.currentUser, password).then(() => {
-      changeLoading(false)
-      changeSuccess(true)
-
-      setTimeout(()=> {
-        changeSuccess(false)
-      }, 5000)
-      
+    reauthenticateWithCredential(auth.currentUser, currentPassword).then(() => {
+      updatePassword(auth.currentUser, password).then(() => {
+        changeLoading(false)
+        changeSuccess(true)
+  
+        setTimeout(()=> {
+          changeSuccess(false)
+        }, 5000)
+        
+      }).catch((error) => {
+        changeError(true)
+        console.error(error)
+      });
     }).catch((error) => {
-      changeError(true)
-      console.error(error)
-    });
+      switch(error.code) {
+        case 'auth/invalid-credential':
+          changeValidationMessage('Incorrect Password entered.')
+          changeCurrentPasswordInvalid(true);
+          break;
+        default: 
+          changeValidationMessage('Something went wrong when trying to sign you up. Please try again later.')
+          console.error(error)
+          break;
+      }
+    })    
   }
   
   validate = () => {
     changeValidationMessage('')
     changePasswordInvalid(false)
     changePassword2Invalid(false)
+    changeCurrentPasswordInvalid(false)
 
-    if(password == '') {
+    if(currentPassword == '') {
       changeValidationMessage('Password not provided.')
+      changeCurrentPasswordInvalid(true)
+      return false
+    } else if(password == '') {
+      changeValidationMessage('New Password not provided.')
       changePasswordInvalid(true)
       return false
     } else if(password.length < 6) {
@@ -82,7 +100,16 @@ export default function ChangePasswordScreen({navigation}) {
   return (
     <View style={GlobalStyles.screen}>
       <View style={GlobalStyles.container}>
-        <Text style={GlobalStyles.label}>Update Password:</Text>
+      <Text style={GlobalStyles.label}>Enter Current Password:</Text>
+        <TextInput
+          style={[GlobalStyles.input, currentPasswordInvalid && GlobalStyles.inputInvalid]}
+          onChangeText={changeCurrentPassword}
+          value={currentPassword}
+          placeholder="Enter current password."
+          secureTextEntry={true}
+        />
+
+        <Text style={GlobalStyles.label}>Enter New Password:</Text>
         <TextInput
           style={[GlobalStyles.input, passwordInvalid && GlobalStyles.inputInvalid]}
           onChangeText={changePassword}
