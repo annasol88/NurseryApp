@@ -8,7 +8,7 @@ export default function ProfileImageCameraScreen({route, navigation}) {
   const cameraRef = useRef(null);
 
   let [facing, changeFacing] = useState('front');
-  let [flash, changeFlash] = useState('auto');
+  let [flash, changeFlash] = useState('off');
   let [permission, requestPermission] = useCameraPermissions();
   
   let [isLoading, changeIsLoading] = useState(false);
@@ -16,7 +16,7 @@ export default function ProfileImageCameraScreen({route, navigation}) {
 
   // to allow camera permissions to load.
   if (!permission) {
-    return <Text style={styles.loading}>Loading...</Text>;
+    return <ActivityIndicator style={GlobalStyles.center} size="large" color="#F85A3E" />
   }
 
   // Camera permissions are not granted yet.
@@ -34,7 +34,8 @@ export default function ProfileImageCameraScreen({route, navigation}) {
   }
 
   usePictureClicked = () => {
-    route.params(picture.base64);
+    // route.params.imageSelected(`data:image/jpg;base64,${picture.base64}`);
+    route.params.imageSelected(picture.uri);
     navigation.goBack();
   }
 
@@ -101,15 +102,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   }, 
+
   camera: {
     flex: 1,
     justifyContent: 'center',
-  },
-
-  loading: {
-    justifySelf: 'center',
-    alignSelf: 'center',
-    height: '100%'
   },
 
   footerPanel: {

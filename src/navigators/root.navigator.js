@@ -19,7 +19,7 @@ export default function RootNavigator() {
         options={{
           tabBarLabel: 'News Feed',
           tabBarActiveTintColor:'#F85A3E',
-          tabBarInactiveTintColor:'#EFEFEF',
+          tabBarInactiveTintColor:'#909090',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="home" color={color} size={size} />
           ),
@@ -33,7 +33,7 @@ export default function RootNavigator() {
           options={{
             tabBarLabel: 'Children',
             tabBarActiveTintColor:'#F85A3E',
-            tabBarInactiveTintColor:'#EFEFEF',
+            tabBarInactiveTintColor:'#909090',
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="account-group" color={color} size={size} />
             ),
@@ -46,7 +46,7 @@ export default function RootNavigator() {
           options={{
             tabBarLabel: 'My Child',
             tabBarActiveTintColor:'#F85A3E',
-            tabBarInactiveTintColor:'#EFEFEF',
+            tabBarInactiveTintColor:'#909090',
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="baby-face" color={color} size={size} />
             ),
@@ -60,7 +60,7 @@ export default function RootNavigator() {
         options={{
           tabBarLabel: 'Settings',
           tabBarActiveTintColor:'#F85A3E',
-          tabBarInactiveTintColor:'#EFEFEF',
+          tabBarInactiveTintColor:'#909090',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="cog" color={color} size={size} />
           ),
