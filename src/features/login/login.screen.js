@@ -5,57 +5,58 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase/main'
 
 export default function LoginScreen({navigation}) {
-  const [email, emailChange] = useState('');
-  const [password, passwordChange] = useState('');
-  const [validationMessage, validationMessageChange] = useState('');
-  const [emailInvalid, emailInvalidChange] = useState(false)
-  const [passwordInvalid, passwordInvalidChange] = useState(false)
+  let [email, changeEmail] = useState('')
+  let [password, changePassword] = useState('')
+  
+  let [emailInvalid, changeEmailInvalid] = useState('')
+  let [passwordInvalid, changePasswordInvalid] = useState('')
 
-  login = () => {
-    if(validateLogin()) {
-      signInWithEmailAndPassword(auth, email, password)
-      .catch((error) => {
-        switch(error.code) {
-          case 'auth/invalid-email': 
-            validationMessageChange('Invalid email format.')
-            emailInvalidChange(true)
-            break;
-          case 'auth/user-not-found':
-            validationMessageChange('Email entered does not match any existing account.')
-            emailInvalidChange(true);
-            break;
-          case 'auth/invalid-credential':
-            validationMessageChange('Incorrect Password entered.')
-            passwordInvalidChange(true);
-            break;
-          default: 
-            validationMessageChange('Something went wrong when trying to sign you up. Please try again later.')
-            console.error(error)
-            break;
-        }
-      });
-    }
-  }
-
+  let [errorMessage, changeErrorMessage] = useState('')
+  
   goToSignUp = () => {
     navigation.navigate('Sign Up')
   }
 
+  login = () => {
+    if(!validateLogin()) return
+    // sign in user through firebase auth
+    signInWithEmailAndPassword(auth, email, password).catch((e) => {
+      switch(e.code) {
+        // handle errors from firebase auth for invalid credentials
+        case 'auth/invalid-email': 
+          changeEmailInvalid('Invalid email format.')
+          break;
+        case 'auth/user-not-found':
+          changeEmailInvalid('Email entered does not match any existing account.');
+          break;
+        case 'auth/invalid-credential':
+        case 'auth/wrong-password':
+          changePasswordInvalid('Incorrect Password entered.');
+          break;
+        default: 
+          changeErrorMessage('Something went wrong when trying to log you in. Please try again later.')
+          console.error(error)
+          break;
+      }
+    })
+  }
+
   validateLogin = () => {
-    emailInvalidChange(false)
-    passwordInvalidChange(false)
+    changeEmailInvalid('')
+    changePasswordInvalid('')
+    changeErrorMessage('')
+
+    let isValid = true
     
     if(email == '') {
-      emailInvalidChange(true)
-      validationMessageChange('Email not provided.')
-      return false
+      changeEmailInvalid('Email not provided.')
+      isValid = false
     } 
     if(password == '') {
-      passwordInvalidChange(true)
-      validationMessageChange('Password not provided.')
-      return false
+      changePasswordInvalid('Password not provided.')
+      isValid = false
     } 
-    return true
+    return isValid
   }
   
   return (
@@ -64,30 +65,49 @@ export default function LoginScreen({navigation}) {
         style={LoginStyles.logo}
         source={require('../../../assets/rainbow.png')}
       /> 
+      <Text style={[GlobalStyles.heading, LoginStyles.heading]}>
+        Nursery Login
+      </Text>
+
       <TextInput
         style={[
           GlobalStyles.input, 
           LoginStyles.input, 
           emailInvalid && GlobalStyles.inputInvalid
         ]}
-        onChangeText={emailChange}
+        onChangeText={changeEmail}
         placeholder="Enter Email Address"
         inputMode="email-address"
       />
+
+      { emailInvalid && 
+        <Text style={[GlobalStyles.invalidText, LoginStyles.invalidText]}>
+          {emailInvalid}
+        </Text>
+      }
+      
       <TextInput
         style={[
           GlobalStyles.input, 
           LoginStyles.input, 
           passwordInvalid && GlobalStyles.inputInvalid    
         ]}
-        onChangeText={passwordChange}
+        onChangeText={changePassword}
         placeholder="Enter Password"
         inputMode="default"
         secureTextEntry={true}
       />
 
-      { validationMessage && 
-        <Text style={[GlobalStyles.invalidText, LoginStyles.invalidText]}>{validationMessage}</Text>
+      { passwordInvalid && 
+        <Text style={[GlobalStyles.invalidText, LoginStyles.invalidText]}>
+          {passwordInvalid}
+        </Text>
+      }
+
+      { errorMessage && 
+        <Text style={[GlobalStyles.invalidText, LoginStyles.invalidText]}>
+          {errorMessage}
+        </Text>
       }
 
       <Pressable onPress={login} style={({pressed}) =>[
@@ -104,5 +124,5 @@ export default function LoginScreen({navigation}) {
         </Pressable>
       </Text>
     </View>
-  );
+  )
 }

@@ -4,7 +4,6 @@ import { GlobalStyles } from '../../styles/shared.styles';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function Activity({activityData}) {
-
   formatTime = (time) => {
     return time.toLocaleTimeString()
   }

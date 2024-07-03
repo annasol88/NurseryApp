@@ -20,7 +20,8 @@ export default function ReportAbsenceScreen({route, navigation}) {
   let [error, changeError] = useState(false);
 
   saveAbsenceClicked = () => {
-    if(!validateAbsence()){ return }
+    if(!validateAbsence()) return 
+
     changeLoading(true)
 
     let activity = newAbsence(date.toDateString(), reason)
@@ -29,7 +30,7 @@ export default function ReportAbsenceScreen({route, navigation}) {
       EventRegister.emit('childAbsenceAdded', activity)
       navigation.goBack();
     }).catch(e => {
-      if(e.code == 'ABSENCE_ALREADY_RECORDED') {
+      if(e.code == 'ACTIVITY_ALREADY_RECORDED') {
         changeValidationMessage('Absence or presence for this date has already been recorded. Please Verify you have selcted the correct date')
         return
       }

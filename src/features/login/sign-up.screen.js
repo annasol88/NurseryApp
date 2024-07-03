@@ -3,71 +3,71 @@ import { View, TextInput, Pressable, Text, Image } from 'react-native';
 import { GlobalStyles, LoginStyles } from '../../../styles/shared.styles';
 import { auth } from '../../firebase/main'
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { createUser } from '../../services/user.service'
+import { createParentUser } from '../../services/user.service'
 
 export default function SignUpScreen({navigation}) {
-  const [email, emailChange] = useState('');
-  const [password, passwordChange] = useState('');
-  const [password2, password2Change] = useState('');
-  const [validationMessage, validationMessageChange] = useState('');
+  let [email, changeEmail] = useState('');
+  let [password, changePassword] = useState('');
+  let [password2, changePassword2] = useState('');
 
-  const [emailInvalid, emailInvalidChange] = useState(false);
-  const [passwordInvalid, passwordInvalidChange] = useState(false);
-  const [password2Invalid, password2InvalidChange] = useState(false);
+  let [emailInvalid, changeEmailInvalid] = useState('');
+  let [passwordInvalid, changePasswordInvalid] = useState('');
+  let [password2Invalid, changePassword2Invalid] = useState('');
 
-  signUp = () => {
-    if(validateSignUp()) {
-      createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        createUser(email)
-      })
-      .catch((error) => {
-        switch(error.code) {
-          case 'auth/invalid-email': 
-            validationMessageChange('Invalid email format.')
-            emailInvalidChange(true)
-            break;
-          case 'auth/weak-password': 
-            validationMessageChange('Password must be at least 6 characters long.')
-            passwordInvalidChange(true)
-            break;
-          case 'email-already-in-use':
-            validationMessageChange('An account with this email already exists.')
-            emailInvalidChange(true)
-            break;
-          default: 
-            validationMessageChange('Something went wrong when trying to sign you up. Please try again later.')
-            console.error(error)
-            break;
-        }
-      });
-    }
-  }
-
-  validateSignUp = () => {
-    emailInvalidChange(false)
-    passwordInvalidChange(false)
-    password2InvalidChange(false)
-
-    if(email == '') {
-      validationMessageChange('Email not provided')
-      emailInvalidChange(true)
-      return false
-    } else if(password == '') {
-      validationMessageChange('Password not provided.')
-      passwordInvalidChange(true)
-      return false
-    } else if(password != password2) {
-      validationMessageChange('Passwords entered do not match.')
-      passwordInvalidChange(true)
-      password2InvalidChange(true)
-      return false
-    }
-    return true
-  }
+  let [errorMessage, changeErrorMessage] = useState('')
 
   goToLogin = () => {
     navigation.goBack()
+  }
+
+  signUp = () => {
+    if(!validateSignUp()) return
+
+    // create user through firebase auth
+    createUserWithEmailAndPassword(auth, email, password).then(async (uc) => {
+      // create user in firebase DB for storing role and child information
+      await createParentUser(email)
+    }).catch((e) => {
+      // handle errors from firebase auth for invalid credentials
+      switch(e.code) {
+        case 'auth/invalid-email': 
+          changeEmailInvalid('Invalid email format.')
+          break;
+        case 'auth/weak-password': 
+          changePasswordInvalid('Password must be at least 6 characters long.')
+          break;
+        case 'email-already-in-use':
+          changeEmailInvalid('An account with this email already exists.')
+          break;
+        default: 
+          changeErrorMessage('Something went wrong when trying to sign you up. Please try again later.')
+          console.error(error)
+          break;
+      }
+    })
+  }
+
+  validateSignUp = () => {
+    changeEmailInvalid('')
+    changePasswordInvalid('')
+    changePassword2Invalid('')
+    changeErrorMessage('')
+
+    let isValid = true
+
+    if(email == '') {
+      changeEmailInvalid('Email not provided')
+      isValid = false
+    } 
+    if(password == '') {
+      changePasswordInvalid('Password not provided.')
+      isValid = false
+    } 
+    if(password != password2) {
+      changePassword2Invalid('Passwords entered do not match.')
+      isValid = false
+    }
+    return isValid
   }
   
   return (
@@ -76,29 +76,55 @@ export default function SignUpScreen({navigation}) {
         style={LoginStyles.logo}
         source={require('../../../assets/rainbow.png')}
       /> 
+      <Text style={[GlobalStyles.heading, LoginStyles.heading]}>
+        Nursery Sign Up
+      </Text>
+
       <TextInput
         style={[GlobalStyles.input, LoginStyles.input, emailInvalid && GlobalStyles.inputInvalid]}
-        onChangeText={emailChange}
-        placeholder="Enter a valid Email Address"
+        onChangeText={changeEmail}
+        placeholder="Enter a Valid Email Address"
         inputMode="email-address"
       />
+
+      { emailInvalid && 
+        <Text style={[GlobalStyles.invalidText, LoginStyles.invalidText]}>
+          {emailInvalid}
+        </Text>
+      }
+
       <TextInput
         style={[GlobalStyles.input, LoginStyles.input, passwordInvalid && GlobalStyles.inputInvalid]}
-        onChangeText={passwordChange}
+        onChangeText={changePassword}
         placeholder="Create Password"
         inputMode="default"
         secureTextEntry={true}
       />
+
+      { passwordInvalid && 
+        <Text style={[GlobalStyles.invalidText, LoginStyles.invalidText]}>
+          {passwordInvalid}
+        </Text>
+      }
+
       <TextInput
         style={[GlobalStyles.input, LoginStyles.input, password2Invalid && GlobalStyles.inputInvalid]}
-        onChangeText={password2Change}
+        onChangeText={changePassword2}
         placeholder="Re-enter Password"
         inputMode="default"
         secureTextEntry={true}
       />
 
-      { validationMessage && 
-        <Text style={[GlobalStyles.invalidText, LoginStyles.invalidText]}>{validationMessage}</Text>
+      { password2Invalid && 
+        <Text style={[GlobalStyles.invalidText, LoginStyles.invalidText]}>
+          {password2Invalid}
+        </Text>
+      }
+
+      { errorMessage && 
+        <Text style={[GlobalStyles.invalidText, LoginStyles.invalidText]}>
+          {errorMessage}
+        </Text>
       }
 
       <Pressable 
@@ -115,5 +141,5 @@ export default function SignUpScreen({navigation}) {
         <Text style={GlobalStyles.link}>Back to login</Text>
       </Pressable>
     </View>
-  );
+  )
 }

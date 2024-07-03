@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { TextInput, Pressable, Text, View, ActivityIndicator, ScrollView } from "react-native";
+import { useState } from 'react';
+import { TextInput, Pressable, Text, View, ActivityIndicator, ScrollView } from 'react-native';
 import { updateEmail, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { EventRegister } from 'react-native-event-listeners'
 
@@ -16,40 +16,47 @@ export default function ChangeEmailScreen() {
 
   let [isLoading, changeLoading] = useState(false);
   let [error, changeError] = useState(false);
-  let [success, changeSuccess] = useState(false);
+  let [success, changeSuccess] = useState(false); 
 
-  let [validationMessage, changeValidationMessage] = useState('');
-  let [emailInvalid, changeEmailInvalid] = useState(false);
-  let [passwordInvalid, changePasswordInvalid] = useState(false);
+  let [emailInvalid, changeEmailInvalid] = useState('');
+  let [passwordInvalid, changePasswordInvalid] = useState('');
 
   saveClicked = async () => {
-    if(!validate()) { return }
+    if(!validate()) return 
+
     changeLoading(true)
 
+    // create firebase auth credential
     const credential = EmailAuthProvider.credential(
       auth.currentUser.email,
       password
     )
 
     try {
+      // if user has not logged in for a while email update will fail
+      // reauthentication will prevent this. 
       await reauthenticateWithCredential(auth.currentUser, credential)
+      // update email in firebase auth
       await updateEmail(auth.currentUser, email)
+      // update email in firebase DB
       await updateUserEmail(currentUser.email, email)
+
       changeSuccess(true)
-      EventRegister.emit('userUpdate', currentUser)
+
+      EventRegister.emit('userUpdate', email)
 
       setTimeout(()=> {
         changeSuccess(false)
       }, 5000)
+      
     } catch(e) {
+      // handle errors from firebase auth for invalid email change
       switch(e.code) {
         case 'auth/invalid-credential':
-          changeValidationMessage('Incorrect Password entered.')
-          changePasswordInvalid(true);
+          changePasswordInvalid('Incorrect Password entered.')
           break;
         case 'email-already-in-use':
-          changeValidationMessage('An account with this email already exists.')
-          changeEmailInvalid(true)
+          changeEmailInvalid('An account with this email already exists.')
           break;
         default: 
           changeError(true)
@@ -62,23 +69,24 @@ export default function ChangeEmailScreen() {
   }
   
   validate = () => {
-    changeValidationMessage('')
-    changePasswordInvalid(false)
+    changeEmailInvalid('')
+    changePasswordInvalid('')
 
+    let isValid = true
+    
     if(email == '') {
-      changeValidationMessage('Email not provided.')
-      changeEmailInvalid(true)
-      return false
-    } else if(password == '') {
-      changeValidationMessage('Password not provided. We need this to authenticate you')
-      changePasswordInvalid(true)
-      return false
-    }
-    return true
+        changeEmailInvalid('Email not provided.')
+        isValid = false
+    } 
+    if(password == '') {
+        changePasswordInvalid('Password not provided.')
+        isValid = false
+    } 
+    return isValid
   }
 
   if(isLoading) {
-    return <ActivityIndicator style={GlobalStyles.center} size="large" color="#F85A3E" />
+    return <ActivityIndicator style={GlobalStyles.center} size='large' color='#F85A3E' />
   }  
   
   if(error) {
@@ -106,25 +114,29 @@ export default function ChangeEmailScreen() {
             style={[GlobalStyles.input, emailInvalid && GlobalStyles.inputInvalid]}
             onChangeText={changeEmail}
             value={email}
-            placeholder="Enter a new email address for this account."
+            placeholder='Enter a new email address for this account.'
           />
+
+          { emailInvalid && 
+            <Text style={GlobalStyles.invalidText}>{emailInvalid}</Text>
+          }
 
           <Text style={GlobalStyles.label}>Enter password:</Text>
           <TextInput
             style={[GlobalStyles.input, passwordInvalid && GlobalStyles.inputInvalid]}
             onChangeText={changePassword}
-            placeholder="Enter password associated with this email."
+            placeholder='Enter password associated with this email.'
             secureTextEntry={true}
           />
 
-          { validationMessage && 
-            <Text style={GlobalStyles.invalidText}>{validationMessage}</Text>
+          { passwordInvalid && 
+            <Text style={GlobalStyles.invalidText}>{passwordInvalid}</Text>
           }
 
           <Pressable 
             onPress={saveClicked} 
             style={({pressed}) => [GlobalStyles.buttonPrimary, pressed && GlobalStyles.buttonPrimaryPressed]}
-            >
+          >
               <Text style={GlobalStyles.buttonPrimaryContent}>Save</Text>
           </Pressable>
         </View>

@@ -154,6 +154,10 @@ export const LoginStyles = StyleSheet.create({
     gap: 12,
   },
 
+  heading: {
+    fontSize: 24
+  },
+
   input: {
     width:'70%'
   },
@@ -164,6 +168,6 @@ export const LoginStyles = StyleSheet.create({
 
   logo: {
     width: 150,
-    height: 150
+    height: 130
   }
 })

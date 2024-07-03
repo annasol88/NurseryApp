@@ -1,41 +1,64 @@
 import { useState, useEffect } from 'react'
-import { ActivityIndicator } from 'react-native'
-import { NavigationContainer } from '@react-navigation/native';
+import { ActivityIndicator, View, Text } from 'react-native'
+import { NavigationContainer } from '@react-navigation/native'
+import { EventRegister } from 'react-native-event-listeners'
 
-import AppNavigator from './src/navigators/app.navigator';
-import { auth } from './src/firebase/main'
 import { onAuthStateChanged } from 'firebase/auth'
+import { auth } from './src/firebase/main'
+
+import AppNavigator from './src/navigators/app.navigator'
 import { UserProvider } from './src/contexts/user.context'
 import { getUser } from './src/services/user.service'
 import { GlobalStyles } from './styles/shared.styles'
-import { EventRegister } from 'react-native-event-listeners'
 
 export default function App() { 
-  const [currentUser, changeCurrentUser] = useState(undefined)
-  const [isLoading, changeIsLoading] = useState(true)
+  let [currentUser, changeCurrentUser] = useState(undefined)
+  let [isLoading, changeIsLoading] = useState(false)
+  let [error, changeError] = useState('');
 
   useEffect(() => {
-    let userChangesListener = EventRegister.addEventListener('userUpdate', fetchUser)
-    onAuthStateChanged(auth, (user) => {
-      fetchUser(user)
+    // to update current user in context if email/child/profile changes in app
+    let userChangeListener = EventRegister.addEventListener(
+      'userUpdate', (email) => fetchUser(email)
+    )
+
+    // to update user when firebase authentication changes - recommended approach
+    onAuthStateChanged(auth, (user) => {  
+      if(user) {
+        fetchUser(user.email)
+      } else {
+        // user will be undefined on signout - setting this navigates to login screen
+        changeCurrentUser(undefined)
+      }
     })
     return () => {
-      EventRegister.removeEventListener(userChangesListener)
+      EventRegister.removeEventListener(userChangeListener)
     }
   }, [])
 
-  fetchUser = async (user) => {
-    if(user) {
-      let u = await getUser(user.email)
-      changeCurrentUser(u)
-    } else {
-      changeCurrentUser(undefined)
-    }
-    changeIsLoading(false)
+  fetchUser = async (email) => {
+    changeIsLoading(true)
+
+    getUser(email).then(user => {
+      changeCurrentUser(user)
+    }).catch(err => {
+      console.error(err)
+      changeError("Something went wrong processing your request. Please try again later or contact a member of staff.")
+    }).finally(() => {
+      changeIsLoading(false)
+    })
   }
 
   if(isLoading) {
     return <ActivityIndicator style={GlobalStyles.center} size="large" color="#F85A3E" />
+  }
+  
+  if(error) {
+    return (
+      <View style={[GlobalStyles.container, GlobalStyles.empty]}>
+        <Text style={GlobalStyles.emptyText}>{error}</Text>
+      </View>
+    )
   } 
 
   return (

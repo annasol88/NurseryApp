@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { TextInput, Pressable, Text, View, ActivityIndicator, ScrollView } from "react-native";
+import { useState } from 'react';
+import { TextInput, Pressable, Text, View, ActivityIndicator, ScrollView } from 'react-native';
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 
 import { GlobalStyles } from '../../../styles/shared.styles';
 import { auth } from '../../firebase/main'
 
-export default function ChangePasswordScreen({navigation}) {
+export default function ChangePasswordScreen() {
   let [currentPassword, changeCurrentPassword] = useState('');
   let [password, changePassword] = useState('');
   let [password2, changePassword2] = useState('');
@@ -14,33 +14,37 @@ export default function ChangePasswordScreen({navigation}) {
   let [error, changeError] = useState(false);
   let [success, changeSuccess] = useState(false);
 
-  let [validationMessage, changeValidationMessage] = useState('');
-  let [currentPasswordInvalid, changeCurrentPasswordInvalid] = useState(false);
-  let [passwordInvalid, changePasswordInvalid] = useState(false);
-  let [password2Invalid, changePassword2Invalid] = useState(false);
+  let [currentPasswordInvalid, changeCurrentPasswordInvalid] = useState('');
+  let [passwordInvalid, changePasswordInvalid] = useState('');
+  let [password2Invalid, changePassword2Invalid] = useState('');
 
   saveClicked = async () => {
-    if(!validate()) { return }
+    if(!validate()) return 
     changeLoading(true)
 
+    // create firebase auth credential
     const credential = EmailAuthProvider.credential(
       auth.currentUser.email,
       currentPassword
     )
 
     try {
+      // if user has not logged in for a while password update will fail
+      // reauthentication will prevent this. 
       await reauthenticateWithCredential(auth.currentUser, credential)
       await updatePassword(auth.currentUser, password)
+
       changeSuccess(true)
 
       setTimeout(()=> {
         changeSuccess(false)
       }, 5000)
+
     } catch(e) {
+      // handle errors from firebase auth for invalid email change
       switch(error.code) {
         case 'auth/invalid-credential':
-          changeValidationMessage('Incorrect Password entered.')
-          changeCurrentPasswordInvalid(true);
+          changeCurrentPasswordInvalid('Incorrect Password entered.')
           break;
         default: 
           changeError(true)
@@ -53,34 +57,34 @@ export default function ChangePasswordScreen({navigation}) {
   }
   
   validate = () => {
-    changeValidationMessage('')
-    changePasswordInvalid(false)
-    changePassword2Invalid(false)
-    changeCurrentPasswordInvalid(false)
+    changePasswordInvalid('')
+    changePassword2Invalid('')
+    changeCurrentPasswordInvalid('')
+
+    let isValid = true
 
     if(currentPassword == '') {
-      changeValidationMessage('Password not provided.')
-      changeCurrentPasswordInvalid(true)
-      return false
-    } else if(password == '') {
-      changeValidationMessage('New Password not provided.')
-      changePasswordInvalid(true)
-      return false
+      changeCurrentPasswordInvalid('Password not provided.')
+      isValid = false
+    } 
+
+    if(password == '') {
+      changePasswordInvalid('New Password not provided.')
+      isValid = false
     } else if(password.length < 6) {
-      changeValidationMessage('Weak password. Password must be at least 6 characters long.')
-      changePasswordInvalid(true)
-      return false
-  } else if(password != password2) {
-      changeValidationMessage('Passwords entered do not match.')
-      changePasswordInvalid(true)
-      changePassword2Invalid(true)
-      return false
+      changePasswordInvalid('Weak password. Password must be at least 6 characters long.')
+      isValid = false
+    }
+
+    if(password != password2) {
+      changePassword2Invalid('Re-entered password does not match.')
+      isValid = false
     }
     return true
   }
 
   if(isLoading) {
-    return <ActivityIndicator style={GlobalStyles.center} size="large" color="#F85A3E" />
+    return <ActivityIndicator style={GlobalStyles.center} size='large' color='#F85A3E' />
   }  
   
   if(error) {
@@ -107,7 +111,7 @@ export default function ChangePasswordScreen({navigation}) {
           <TextInput
             style={[GlobalStyles.input, currentPasswordInvalid && GlobalStyles.inputInvalid]}
             onChangeText={changeCurrentPassword}
-            placeholder="Enter current password."
+            placeholder='Enter current password.'
             secureTextEntry={true}
           />
 
@@ -115,14 +119,14 @@ export default function ChangePasswordScreen({navigation}) {
           <TextInput
             style={[GlobalStyles.input, passwordInvalid && GlobalStyles.inputInvalid]}
             onChangeText={changePassword}
-            placeholder="Enter new password."
+            placeholder='Enter new password.'
             secureTextEntry={true}
           />
 
           <TextInput
             style={[GlobalStyles.input, password2Invalid && GlobalStyles.inputInvalid]}
             onChangeText={changePassword2}
-            placeholder="Re-enter new password."
+            placeholder='Re-enter new password.'
             secureTextEntry={true}
           />
 

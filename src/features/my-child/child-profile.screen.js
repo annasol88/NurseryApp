@@ -62,11 +62,19 @@ export default function ChildProfileScreen({route, navigation}) {
     if(!validateDetails()){ return }
 
     changeLoading(true)
-    // to ensure valid sername is generated child name is trimmed
-    let cleanChildName = childName.trim()
 
     // if no child data is currently stored
     if(!child) {
+      uploadNewChild()
+    } else {
+      updateCHildInfo()
+    }
+  }
+
+  uploadNewChild = async () => {
+    try {
+      // to ensure valid sername is generated child name is trimmed
+      let cleanChildName = childName.trim()
       let childUserName = generateUserName(currentUser.email, cleanChildName)
       storedAvatarUrl = await setAvatar(childUserName, avatarUrl)
       let childData = newChild(childUserName, childName, storedAvatarUrl, dob.toDateString(), address, allergies, diet, doctor)
@@ -74,48 +82,58 @@ export default function ChildProfileScreen({route, navigation}) {
       let setChildComplete = setChild(childData)
       let updateUserComplete = setUser(currentUser.email, { child: childUserName })
 
+      // promise all is used to complete tasks in parallel since they do not depend on each other
       Promise.all([setChildComplete, updateUserComplete]).then(() => {
         EventRegister.emit('childUpdate', childData)
-        EventRegister.emit('userUpdate', currentUser)
+        EventRegister.emit('userUpdate', currentUser.email)
         navigation.goBack();
-      }).catch(e => {
-        changeError(true)
-        console.error(e)
-      }).finally(() => changeLoading(false))
-      return
-    }
-
-    //TODO handle username change on name change
-    //let usernameChange = childName != child?.childName
-    
-    let avatarChange = avatarUrl != '' && avatarUrl != child?.avatarUrl
-    let dobChange = dob != child?.dob
-    let avatarUrlToSave = avatarChange ? await setAvatar(child.userName, avatarUrl) : avatarUrl
-    let dobToSave = dobChange ? dob.toDateString() : dob
-
-    childData = newChild(child.userName, childName, avatarUrlToSave, dobToSave, address, allergies, diet, doctor)
-
-    setChild(childData).then(() => {
-      EventRegister.emit('childUpdate', childData)
-      navigation.goBack();
-    }).catch(e => {
+      })
+    } catch(e) {
       changeError(true)
       console.error(e)
-    }).finally(() => changeLoading(false))
+    } finally { 
+      changeLoading(false) 
+    }
+  }
+
+  updateChildInfo = async () => {
+    try {
+      //TODO handle username change on name change
+      //let usernameChange = childName != child?.childName
+    
+      let avatarChange = avatarUrl != '' && avatarUrl != child?.avatarUrl
+      let dobChange = dob != child?.dob
+      let avatarUrlToSave = avatarChange ? await setAvatar(child.userName, avatarUrl) : avatarUrl
+      let dobToSave = dobChange ? dob.toDateString() : dob
+
+      childData = newChild(child.userName, childName, avatarUrlToSave, dobToSave, address, allergies, diet, doctor)
+
+      await setChild(childData)
+      EventRegister.emit('childUpdate', childData)
+      navigation.goBack()
+    } catch (e) {
+      changeError(true)
+      console.error(e)
+    } finally { 
+      changeLoading(false) 
+    }
   }
 
   validateDetails = () => {
     changeChildNameValidation('')
     changeAddressValidation('')
 
+    let isValid = true
+
     if(childName === undefined){
       changeChildNameValidation(`You must enter your child's name.`)
-      return false
-    } else if (address == '') {
-      changeAddressValidation('You must enter your address.')
-      return false
+      isValid = false
     } 
-    return true
+    if (address == '') {
+      changeAddressValidation('You must enter your address.')
+      isValid = false
+    } 
+    return isValid
   }
 
   if(isLoading) {

@@ -17,12 +17,13 @@ export default function NewPostScreen({navigation}) {
   let [error, changeError] = useState(false)
 
   postClicked = () => {
-    if(!validateText()){ return }
+    if(!validateText()) return 
+
     changeLoading(true)
 
+    // TODO - store user profile pictures
     let post = newPost(text, [], currentUser.email, 'https://avataaars.io/?avatarStyle=Circle')
-    createPost(post)
-    .then(() => {
+    createPost(post).then(() => {
       EventRegister.emit('postCreated', post)
       navigation.navigate('News Feed')
     }).catch(e => {
@@ -53,22 +54,28 @@ export default function NewPostScreen({navigation}) {
 
   return (
     <View style={GlobalStyles.screen}>
-      <TextInput
-        style={[GlobalStyles.input, validationMessage && GlobalStyles.inputInvalid]}
-        multiline={true}
-        numberOfLines={6}
-        onChangeText={changeText}
-        value={text}
-        placeholder="Start typing your post..."
-      />
+      <View style={GlobalStyles.container}>
+        <Text style={GlobalStyles.label}>Post Message:</Text>
+        <TextInput
+          style={[GlobalStyles.input, validationMessage && GlobalStyles.inputInvalid]}
+          multiline={true}
+          numberOfLines={6}
+          onChangeText={changeText}
+          value={text}
+          placeholder="Start typing your post..."
+        />
 
-      { validationMessage != '' && 
-        <Text style={GlobalStyles.invalidText}>{validationMessage}</Text>
-      }
+        { validationMessage != '' && 
+          <Text style={GlobalStyles.invalidText}>{validationMessage}</Text>
+        }
 
-      <Pressable onPress={postClicked} style={({pressed}) => [GlobalStyles.buttonPrimary, pressed && GlobalStyles.buttonPrimaryPressed]}>
-        <Text style={GlobalStyles.buttonPrimaryContent}>Post</Text>
-      </Pressable>
+        <Pressable 
+          onPress={postClicked} 
+          style={({pressed}) => [GlobalStyles.buttonPrimary, pressed && GlobalStyles.buttonPrimaryPressed]}
+        >
+          <Text style={GlobalStyles.buttonPrimaryContent}>Post</Text>
+        </Pressable>
+      </View>
     </View>
   )
 }

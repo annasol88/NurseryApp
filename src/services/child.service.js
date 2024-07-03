@@ -10,7 +10,7 @@ export async function getChild(childUserName) {
   if(docSnap.exists()) {
     return docSnap.data()
   }
-  console.warn(`Child with username: ${childUserName} not found.`)
+  console.warn(`Child with username: ${childUserName} not found.`) 
   return Promise.resolve(undefined)
 }
 
@@ -60,15 +60,13 @@ export async function addActivity(username, activity) {
     return Promise.reject('child not found')
   }
 
-  console.log(activity.date)
-  console.log(child.activities)
 
   let alreadyRecorded = child.activities.find(a => {
     return a.date == activity.date
   })
 
   if(alreadyRecorded) {
-    return Promise.reject({code:'ABSENCE_ALREADY_RECORDED'})
+    return Promise.reject({code:'ACTIVITY_ALREADY_RECORDED'})
   } 
   child.activities.push(activity)
   return await setChild(child)

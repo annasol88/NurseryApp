@@ -1,7 +1,4 @@
-import { View, Text, Image } from 'react-native';
-
-import { GlobalStyles } from '../../../styles/shared.styles';
-import { useUserContext } from '../../contexts/user.context';
+import { Text } from 'react-native';
 
 export default function ChangePasswordScreen({navigation}) {
   return <Text>Coming Soon</Text>

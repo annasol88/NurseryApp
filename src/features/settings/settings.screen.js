@@ -1,5 +1,5 @@
 import { View, Pressable, Text } from 'react-native';
-import { signOut } from "firebase/auth";
+import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase/main'
 
 import { GlobalStyles } from '../../../styles/shared.styles';

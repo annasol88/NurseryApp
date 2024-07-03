@@ -10,14 +10,14 @@ import { useUserContext } from '../../contexts/user.context';
 export default function NewsFeedScreen({navigation}) {
   let {currentUser} = useUserContext()
 
-  let [isLoading, changeLoading] = useState(true);
   let [posts, changePosts] = useState([]);
+
+  let [isLoading, changeLoading] = useState(true);
   let [error, changeError] = useState(false);
 
   useEffect(() => {
     loadPosts()
-    // listeners to update post in state so to avoid excessive API fetches
-    // TODO consider perhaps redux is more appropriate here
+    // listeners only update posts in memory to avoid excessive API fetching on every change
     let updatePostListener = EventRegister.addEventListener('postUpdated', updatePosts)
     let newPostListener = EventRegister.addEventListener('postCreated', addNewPost)
     return () => {
@@ -95,8 +95,4 @@ export default function NewsFeedScreen({navigation}) {
     </>
   )
 }
-
-const styles = StyleSheet.create({
-
-})
 
