@@ -43,7 +43,10 @@ export default function ChangePasswordScreen() {
     } catch(e) {
       // handle errors from firebase auth for invalid email change
       switch(error.code) {
+        // firebase throws differend error codes on change email/change password/login - all are accounted to be safe 
         case 'auth/invalid-credential':
+        case 'auth/wrong-password':
+        case 'auth/invalid-password':
           changeCurrentPasswordInvalid('Incorrect Password entered.')
           break;
         default: 
@@ -80,7 +83,7 @@ export default function ChangePasswordScreen() {
       changePassword2Invalid('Re-entered password does not match.')
       isValid = false
     }
-    return true
+    return isValid
   }
 
   if(isLoading) {
@@ -115,6 +118,11 @@ export default function ChangePasswordScreen() {
             secureTextEntry={true}
           />
 
+          { currentPasswordInvalid && 
+            <Text style={GlobalStyles.invalidText}>{currentPasswordInvalid}</Text>
+          }
+
+
           <Text style={GlobalStyles.label}>Enter New Password:</Text>
           <TextInput
             style={[GlobalStyles.input, passwordInvalid && GlobalStyles.inputInvalid]}
@@ -123,6 +131,11 @@ export default function ChangePasswordScreen() {
             secureTextEntry={true}
           />
 
+          { passwordInvalid && 
+            <Text style={GlobalStyles.invalidText}>{passwordInvalid}</Text>
+          }
+
+
           <TextInput
             style={[GlobalStyles.input, password2Invalid && GlobalStyles.inputInvalid]}
             onChangeText={changePassword2}
@@ -130,8 +143,8 @@ export default function ChangePasswordScreen() {
             secureTextEntry={true}
           />
 
-          { validationMessage && 
-            <Text style={GlobalStyles.invalidText}>{validationMessage}</Text>
+          { password2Invalid && 
+            <Text style={GlobalStyles.invalidText}>{password2Invalid}</Text>
           }
 
           <Pressable 

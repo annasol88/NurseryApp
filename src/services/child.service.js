@@ -1,4 +1,4 @@
-import { setDoc, doc, getDoc } from 'firebase/firestore'; 
+import { setDoc, doc, getDoc, deleteDoc } from 'firebase/firestore'; 
 import { uploadBytes, ref, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase/main'
 
@@ -15,7 +15,8 @@ export async function getChild(childUserName) {
 }
 
 export function generateUserName(parentEmail, name) {
-  return `${parentEmail}_${name}`
+  // to ensure valid sername is generated child name is trimmed
+  return `${parentEmail}_${name.trim().toLowerCase()}`
 }
 
 // all data uploads are created through calling newChild to ensure consistent data mappings
@@ -46,6 +47,10 @@ export async function setChild(childData) {
   return setDoc(childRef, childData, { merge: true });
 }
 
+export async function removeChild(username) {
+  await deleteDoc(doc(db, CHILDREN_PATH, username));
+}
+
 export function newAbsence(date, reason) {
   return {
     type: 'ABSENCE',
@@ -60,7 +65,6 @@ export async function addActivity(username, activity) {
     return Promise.reject('child not found')
   }
 
-
   let alreadyRecorded = child.activities.find(a => {
     return a.date == activity.date
   })
@@ -69,5 +73,10 @@ export async function addActivity(username, activity) {
     return Promise.reject({code:'ACTIVITY_ALREADY_RECORDED'})
   } 
   child.activities.push(activity)
+
+  child.activities = child.activities.sort(function(a,b){
+    return new Date(b.date) - new Date(a.date);
+  });
+  
   return await setChild(child)
 }

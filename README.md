@@ -1,42 +1,38 @@
 # Running the App
 ## IOS or Android
-IOS or android native device must first have expo go installed to host the application.
+First make sure your IOS or android native device has expo go installed to host the application:
+- [Android installation](https://play.google.com/store/apps/details?id=host.exp.exponent&hl=en&pli=1)
+- [IOS installation](https://apps.apple.com/us/app/expo-go/id982107779)
 
-android installation: https://play.google.com/store/apps/details?id=host.exp.exponent&hl=en&pli=1
-
-IOS installation: https://apps.apple.com/us/app/expo-go/id982107779
-
-Assuming nodejs is installed on the computer running the app, open a new terminal and run the followig:
+Then assuming nodejs is installed on the computer running the app, open a new terminal and run the followig:
 
 ` npm install ` to install required dependencies.
 
 ` npm run start ` to start the expo go app.
 
-this should print a QR code in the terminal which can be scanned by the native device to start interacting with the app.
+This should print a QR code in the terminal which can be scanned by the native device to start using the app.
 
 ## Web 
-Alternatively the app can also be tested on web however it is not optimised for this and  has known drawbacks:
-- datepicker is not compatible at all and will not work.
-- auth persistance is also not available (to keep a user logged in across sessions).
+Alternatively the app can also be used on web by navigating to http://localhost:8081 on your desired web browser once the app is running.
 
-Since auth persistance is not available you will need to change how the app auth is initialised by:
-- uncommenting line 20 in src/firebase/main
-- and commenting lines 24-26 in src/firebase/main
-
-Then run the same commands as before `npm install` if not done so already and `npm run start` to run the app. 
-
-Then navigate to http://localhost:8081 on your desired web browser to start interacting with the app.
+It should be acknowledged that the datepicker is not compatible with web and will not work.
 
 ## User roles
 The app is conigured to support 2 types of users: ADMINS and PARENTS.
 
-A parent user can be created upon signup with a new email. 
+To access the app as an admin you will need to login using existing admin credentials:
 
-However you cannot create an admin user. To access the app as an admin you will need to login using existing admin credentials:
+> email: admin@nursery.com
+>
+> password: 123456
 
-email: admin@nursery.com
+A parent user can either be created on sign up with a new email or accessed using the below credentials:
 
-password: 123456
+> email: parent@nursery.com
+>
+> password: 123456
+
+Note: This account shows an example profile with child activities that are not just absences.
 
 # Implementation Decisions
 ## Folder Structure
@@ -53,4 +49,6 @@ To allow users to update their email addresses, e-mail enumeration protection is
 It is acknowledge that this is not safe since this makes the app vulnerable to e-mail enumeration attacks.
 
 Since only fake emails are used in the app which stores fake data, this risk is negligable and should not pose any threat.
+
+An attempt was made to implement auth persistance for android and ios clients to stay logged in. However it was found that this was problematic when updating emails so will be omitted for this submission.
 

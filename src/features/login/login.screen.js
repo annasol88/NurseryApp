@@ -29,8 +29,10 @@ export default function LoginScreen({navigation}) {
         case 'auth/user-not-found':
           changeEmailInvalid('Email entered does not match any existing account.');
           break;
-        case 'auth/invalid-credential':
-        case 'auth/wrong-password':
+          // firebase throws differend error codes on change email/change password/login - all are accounted to be safe 
+          case 'auth/invalid-credential':
+          case 'auth/wrong-password':
+          case 'auth/invalid-password':
           changePasswordInvalid('Incorrect Password entered.');
           break;
         default: 
@@ -118,11 +120,12 @@ export default function LoginScreen({navigation}) {
       </Pressable>
 
 
-      <Text>Don't have an account? 
+      <View style={LoginStyles.links}>
+        <Text>Don't have an account?</Text> 
         <Pressable onPress={goToSignUp} style={GlobalStyles.indent}>
           <Text style={GlobalStyles.link}>register here</Text>
         </Pressable>
-      </Text>
+      </View>
     </View>
   )
 }

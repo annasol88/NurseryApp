@@ -74,7 +74,7 @@ export default function NewsFeedScreen({navigation}) {
       <View style={GlobalStyles.screen}>
         { currentUser.role == 'ADMIN' && 
           <Pressable onPress={newPostPageClicked} style={GlobalStyles.buttonPrimary}>
-            <Text style={GlobalStyles.buttonPrimaryContent}>+ Create New Post</Text>
+            <Text style={GlobalStyles.buttonPrimaryContent}>Create New Post</Text>
           </Pressable>
         }
         <FlatList
@@ -87,7 +87,7 @@ export default function NewsFeedScreen({navigation}) {
         <Text style={GlobalStyles.emptyText}>No Posts</Text>
         { currentUser.role == 'ADMIN' && 
           <Pressable onPress={newPostPageClicked} style={GlobalStyles.buttonPrimary}>
-            <Text style={GlobalStyles.buttonPrimaryContent}>+ Create New Post</Text>
+            <Text style={GlobalStyles.buttonPrimaryContent}>Create New Post</Text>
           </Pressable>
         }
       </View>

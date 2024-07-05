@@ -25,8 +25,8 @@ export default function SignUpScreen({navigation}) {
 
     // create user through firebase auth
     createUserWithEmailAndPassword(auth, email, password).then(async (uc) => {
-      // create user in firebase DB for storing role and child information
-      await createParentUser(email)
+      cleanEmail = email.trim().toLowerCase()
+      await createParentUser(cleanEmail)
     }).catch((e) => {
       // handle errors from firebase auth for invalid credentials
       switch(e.code) {

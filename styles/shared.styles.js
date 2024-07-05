@@ -147,10 +147,11 @@ export const GlobalStyles = StyleSheet.create({
 
 export const LoginStyles = StyleSheet.create({
   screen: {
+    marginVertical: 100,
     height: '100%',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     gap: 12,
   },
 
@@ -163,11 +164,17 @@ export const LoginStyles = StyleSheet.create({
   },
 
   invalidText: {
-    width: '70%'
+    width: '70%',
+    textAlign: 'center'
   },
 
   logo: {
     width: 150,
     height: 130
+  },
+
+  links: {
+    display:'flex',
+    flexDirection: 'row'
   }
 })

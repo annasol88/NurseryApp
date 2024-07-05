@@ -39,11 +39,12 @@ export default function ChangeEmailScreen() {
       // update email in firebase auth
       await updateEmail(auth.currentUser, email)
       // update email in firebase DB
-      await updateUserEmail(currentUser.email, email)
+      cleanEmail = email.trim().toLowerCase()
+      await updateUserEmail(currentUser.email, cleanEmail)
 
       changeSuccess(true)
 
-      EventRegister.emit('userUpdate', email)
+      EventRegister.emit('userUpdate', cleanEmail)
 
       setTimeout(()=> {
         changeSuccess(false)
@@ -52,10 +53,13 @@ export default function ChangeEmailScreen() {
     } catch(e) {
       // handle errors from firebase auth for invalid email change
       switch(e.code) {
+        // firebase throws differend error codes on change email/change password/login - all are accounted to be safe 
         case 'auth/invalid-credential':
+        case 'auth/wrong-password':
+        case 'auth/invalid-password':
           changePasswordInvalid('Incorrect Password entered.')
           break;
-        case 'email-already-in-use':
+        case 'auth/email-already-in-use':
           changeEmailInvalid('An account with this email already exists.')
           break;
         default: 

@@ -11,6 +11,8 @@ import { UserProvider } from './src/contexts/user.context'
 import { getUser } from './src/services/user.service'
 import { GlobalStyles } from './styles/shared.styles'
 
+import { MyTheme } from './src/navigators/_nav-theme'
+
 export default function App() { 
   let [currentUser, changeCurrentUser] = useState(undefined)
   let [isLoading, changeIsLoading] = useState(false)
@@ -25,7 +27,12 @@ export default function App() {
     // to update user when firebase authentication changes - recommended approach
     onAuthStateChanged(auth, (user) => {  
       if(user) {
-        fetchUser(user.email)
+        // timeout will allow users to be created on signup
+        // unfortunitely there is not better way to manage this using onAuthStateChanged.
+        setTimeout(() => {
+          fetchUser(user.email)
+        }, 1000)
+
       } else {
         // user will be undefined on signout - setting this navigates to login screen
         changeCurrentUser(undefined)
@@ -39,14 +46,15 @@ export default function App() {
   fetchUser = async (email) => {
     changeIsLoading(true)
 
-    getUser(email).then(user => {
+    try {
+      user = await getUser(email)
       changeCurrentUser(user)
-    }).catch(err => {
+    } catch(err) {
       console.error(err)
       changeError("Something went wrong processing your request. Please try again later or contact a member of staff.")
-    }).finally(() => {
+    } finally {
       changeIsLoading(false)
-    })
+    }
   }
 
   if(isLoading) {
@@ -63,7 +71,7 @@ export default function App() {
 
   return (
     <UserProvider value={{currentUser}}>
-      <NavigationContainer>
+      <NavigationContainer theme={MyTheme}>
         <AppNavigator />
       </NavigationContainer>
     </UserProvider>

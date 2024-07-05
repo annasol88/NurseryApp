@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Text, StyleSheet, Pressable, View, Image, ActivityIndicator, ScrollView, FlatList} from 'react-native'
+import { Text, StyleSheet, Pressable, View, Image, ActivityIndicator, FlatList} from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { EventRegister } from 'react-native-event-listeners'
 
@@ -38,7 +38,7 @@ export default function ChildActivityScreen({navigation}) {
     })
   }
 
-  displayAvater = () => {
+  displayAvatar = () => {
     return childData.avatarUrl ? {uri: childData.avatarUrl} : require('../../../assets/empty-avatar.png')
   }
 
@@ -86,61 +86,59 @@ export default function ChildActivityScreen({navigation}) {
   }
 
   return (
-    <ScrollView automaticallyAdjustKeyboardInsets={true}>
-      <View style={GlobalStyles.screen}>
-        <View style={[GlobalStyles.container, styles.header]}>
-            <Image
-              style={styles.headerAvatar}
-              source={displayAvater()}
-            /> 
-            <Text style={styles.heading}>{childData.name}</Text>
+    <View style={GlobalStyles.screen}>
+      <View style={[GlobalStyles.container, styles.header]}>
+          <Image
+            style={styles.headerAvatar}
+            source={displayAvatar()}
+          /> 
+          <Text style={styles.heading}>{childData.name}</Text>
 
-            <View style={styles.headerItems}>
-              <View style={styles.headerItem}>
-                <MaterialCommunityIcons name="calendar" color={'#F85A3E'} size={20}/>
-                <Text>{childData.dob}</Text>
-              </View>
-              <View style={styles.headerItem}>
-                <MaterialCommunityIcons name="account" color={'#F85A3E'} size={20}/>
-                <Text>@{childData.userName}</Text>
-              </View>
+          <View style={styles.headerItems}>
+            <View style={styles.headerItem}>
+              <MaterialCommunityIcons name="calendar" color={'#F85A3E'} size={20}/>
+              <Text>{childData.dob}</Text>
             </View>
-        </View>
-
-        <View style={styles.tab}>
-          <Pressable 
-            onPress={reportAbsenceClicked} style={({pressed}) => [
-              styles.tabButton, 
-              pressed && GlobalStyles.buttonSecondaryPressed]}
-          > 
-            <Text style={GlobalStyles.buttonSecondaryContent}>Report Absence</Text>
-          </Pressable>
-
-          <Pressable 
-            onPress={viewChildInfoClicked} style={({pressed}) => [
-              styles.tabButton, 
-              pressed && GlobalStyles.buttonSecondaryPressed]}
-          > 
-            <Text style={GlobalStyles.buttonSecondaryContent}>View Profile</Text>
-          </Pressable>
-        </View>
-
-        <Text style={[styles.heading, GlobalStyles.center]}>
-          {childData.name}'s Record
-        </Text>
-
-        { childData.activities?.length > 0 ? (
-          <FlatList
-            data={childData.activities}
-            renderItem={({item}) => {return <Activity activityData={item} />}}
-          />
-        ) : (
-          <View style={[GlobalStyles.container, GlobalStyles.empty]}>
-            <Text style={GlobalStyles.emptyText}>No Activities Reported</Text>
+            <View style={styles.headerItem}>
+              <MaterialCommunityIcons name="account" color={'#F85A3E'} size={20}/>
+              <Text>{childData.userName}</Text>
+            </View>
           </View>
-        )}
       </View>
-    </ScrollView>
+
+      <View style={styles.tab}>
+        <Pressable 
+          onPress={reportAbsenceClicked} style={({pressed}) => [
+            styles.tabButton, 
+            pressed && GlobalStyles.buttonSecondaryPressed]}
+        > 
+          <Text style={GlobalStyles.buttonSecondaryContent}>Report Absence</Text>
+        </Pressable>
+
+        <Pressable 
+          onPress={viewChildInfoClicked} style={({pressed}) => [
+            styles.tabButton, 
+            pressed && GlobalStyles.buttonSecondaryPressed]}
+        > 
+          <Text style={GlobalStyles.buttonSecondaryContent}>View Profile</Text>
+        </Pressable>
+      </View>
+
+      <Text style={[styles.heading, GlobalStyles.center]}>
+        {childData.name}'s Record
+      </Text>
+
+      { childData.activities?.length > 0 ? (
+        <FlatList
+          data={childData.activities}
+          renderItem={({item}) => {return <Activity activityData={item} />}}
+        />
+      ) : (
+        <View style={[GlobalStyles.container, GlobalStyles.empty]}>
+          <Text style={GlobalStyles.emptyText}>No Activities Reported</Text>
+        </View>
+      )}
+    </View>
   );
   
 }
@@ -158,7 +156,6 @@ const styles = StyleSheet.create({
   },
 
   heading: {
-    textTransform: 'capitalize',
     fontWeight: '600',
     color: '#909090',
     fontSize: 20,

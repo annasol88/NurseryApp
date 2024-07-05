@@ -41,8 +41,8 @@ export default function Post({postData}) {
           style={styles.headerAvatar}
           source={{uri: postData.userAvatar}}
         /> 
-        <Text style={styles.headerText} >{postData.userName}</Text>
-        <Text style={styles.headerTimestamp} >{elapsedTime()}</Text>
+        <Text style={styles.headerText}>{postData.userName}</Text>
+        <Text style={styles.headerTimestamp}>{elapsedTime()}</Text>
       </View>
 
       <View style={styles.content}>

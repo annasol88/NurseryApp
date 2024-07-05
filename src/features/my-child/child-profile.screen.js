@@ -8,7 +8,7 @@ import { LogBox } from 'react-native';
 
 import { useUserContext } from '../../contexts/user.context';
 import { GlobalStyles } from '../../../styles/shared.styles';
-import { generateUserName, newChild, setChild, setAvatar } from '../../services/child.service';
+import { generateUserName, newChild, setChild, setAvatar, removeChild } from '../../services/child.service';
 import { setUser } from '../../services/user.service'
 
 export default function ChildProfileScreen({route, navigation}) {
@@ -16,8 +16,8 @@ export default function ChildProfileScreen({route, navigation}) {
   const {currentUser} = useUserContext()
 
   let [childName, changeChildName] = useState(child?.name ?? '')
-  let [avatarUrl, changeAvatar] = useState(child?.avatarUrl ?? undefined)
-  let [dob, changeDob] = useState(new Date(child?.dob) ?? new Date())
+  let [avatarUrl, changeAvatar] = useState(child?.avatarUrl ?? '')
+  let [dob, changeDob] = useState(child?.dob ? new Date(child.dob) : new Date())
   let [address, changeAddress] = useState(child?.address ?? '')
   let [allergies, changeAllergies] = useState(child?.allergies ?? '')
   let [diet, changeDiet] = useState(child?.diet ?? '')
@@ -29,7 +29,7 @@ export default function ChildProfileScreen({route, navigation}) {
   let [isLoading, changeLoading] = useState(false);
   let [error, changeError] = useState(false);
 
-  displayAvater = () => {
+  displayAvatar = () => {
     return avatarUrl ? {uri: avatarUrl} : require('../../../assets/empty-avatar.png')
   }
 
@@ -59,35 +59,16 @@ export default function ChildProfileScreen({route, navigation}) {
   }
 
   saveDetailsClicked = async () => {
-    if(!validateDetails()){ return }
+    if(!validateDetails()) return 
 
     changeLoading(true)
 
-    // if no child data is currently stored
-    if(!child) {
-      uploadNewChild()
-    } else {
-      updateCHildInfo()
-    }
-  }
-
-  uploadNewChild = async () => {
     try {
-      // to ensure valid sername is generated child name is trimmed
-      let cleanChildName = childName.trim()
-      let childUserName = generateUserName(currentUser.email, cleanChildName)
-      storedAvatarUrl = await setAvatar(childUserName, avatarUrl)
-      let childData = newChild(childUserName, childName, storedAvatarUrl, dob.toDateString(), address, allergies, diet, doctor)
-
-      let setChildComplete = setChild(childData)
-      let updateUserComplete = setUser(currentUser.email, { child: childUserName })
-
-      // promise all is used to complete tasks in parallel since they do not depend on each other
-      Promise.all([setChildComplete, updateUserComplete]).then(() => {
-        EventRegister.emit('childUpdate', childData)
-        EventRegister.emit('userUpdate', currentUser.email)
-        navigation.goBack();
-      })
+      if(!child) {
+        await uploadNewChild()
+      } else {
+        await updateChildInfo()
+      }
     } catch(e) {
       changeError(true)
       console.error(e)
@@ -97,26 +78,44 @@ export default function ChildProfileScreen({route, navigation}) {
   }
 
   updateChildInfo = async () => {
-    try {
-      //TODO handle username change on name change
-      //let usernameChange = childName != child?.childName
-    
-      let avatarChange = avatarUrl != '' && avatarUrl != child?.avatarUrl
-      let dobChange = dob != child?.dob
-      let avatarUrlToSave = avatarChange ? await setAvatar(child.userName, avatarUrl) : avatarUrl
-      let dobToSave = dobChange ? dob.toDateString() : dob
+    // check what properties have changed
+    let avatarChange = avatarUrl != '' && avatarUrl != child?.avatarUrl
+    let dobChange = dob != child?.dob
+    let nameChange = childName != child?.name
 
-      childData = newChild(child.userName, childName, avatarUrlToSave, dobToSave, address, allergies, diet, doctor)
+    // assign properties to changed values
+    let usernameToSave = nameChange ? generateUserName(currentUser.email, childName) : child.userName
+    let avatarUrlToSave = avatarChange ? await setAvatar(usernameToSave, avatarUrl) : avatarUrl
+    let dobToSave = dobChange ? dob.toDateString() : dob
 
-      await setChild(childData)
-      EventRegister.emit('childUpdate', childData)
-      navigation.goBack()
-    } catch (e) {
-      changeError(true)
-      console.error(e)
-    } finally { 
-      changeLoading(false) 
+    // child to save
+    childData = newChild(usernameToSave, childName, avatarUrlToSave, dobToSave, address, allergies, diet, doctor)
+    await setChild(childData)
+
+    if(nameChange) {
+      await setUser(currentUser.email, { child: usernameToSave })
+      await removeChild(child.userName)
+      EventRegister.emit('userUpdate', currentUser.email)
     }
+
+    EventRegister.emit('childUpdate', childData)
+    navigation.goBack();
+  }
+
+  uploadNewChild = async () => {
+    let childUserName = generateUserName(currentUser.email, childName)
+    let storedAvatarUrl = avatarUrl ? await setAvatar(childUserName, avatarUrl) : ''
+    let childData = newChild(childUserName, childName, storedAvatarUrl, dob.toDateString(), address, allergies, diet, doctor)
+
+    let setChildComplete = setChild(childData)
+    let updateUserComplete = setUser(currentUser.email, { child: childUserName })
+
+    // promise all is used to complete tasks in parallel since they do not depend on each other
+    Promise.all([setChildComplete, updateUserComplete]).then(() => {
+      EventRegister.emit('childUpdate', childData)
+      EventRegister.emit('userUpdate', currentUser.email)
+      navigation.goBack();
+    })
   }
 
   validateDetails = () => {
@@ -125,7 +124,7 @@ export default function ChildProfileScreen({route, navigation}) {
 
     let isValid = true
 
-    if(childName === undefined){
+    if(childName == ''){
       changeChildNameValidation(`You must enter your child's name.`)
       isValid = false
     } 
@@ -154,12 +153,10 @@ export default function ChildProfileScreen({route, navigation}) {
         <View style={GlobalStyles.container}>
           <Text style={GlobalStyles.heading}>Profile Image</Text>
           <View style={styles.profilePicSection}>
-            { avatarUrl && 
-              <Image
-                style={styles.avatar}
-                source={displayAvater()}
-              /> 
-            }
+            <Image
+              style={styles.avatar}
+              source={displayAvatar()}
+            /> 
             <View style={styles.profilePicButtons}>
               <Pressable onPress={takeImageClicked} 
                 style={({pressed}) =>[
@@ -282,8 +279,8 @@ const styles = StyleSheet.create({
   },
 
   avatar: {
-    width: 100,
-    height: 100,
+    width: 120,
+    height: 120,
     borderRadius: '50%',
   },
 

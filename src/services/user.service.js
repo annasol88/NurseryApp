@@ -1,6 +1,7 @@
 import { deleteDoc, getDoc, setDoc, doc } from 'firebase/firestore'; 
 import { db } from '../firebase/main'
 import { updateUserPosts, updateUserLikedPosts } from './news-feed.service'
+import { generateUserName, getChild, setChild, removeChild} from './child.service';
 
 const USER_PATH = 'users'
   
@@ -29,13 +30,24 @@ export async function createParentUser(userEmail) {
 export async function updateUserEmail(currentEmail, newEmail) {
   let userData = await getUser(currentEmail)
 
+  // if user has a child - their username will be updated
+  if(userData.child) {
+    let userChild = await getChild(userData.child)
+    oldUsername = userChild.userName
+    newUserName = generateUserName(newEmail, userChild.name)
+
+    userData.child = newUserName
+    userChild.userName = newUserName
+
+    await setChild(userChild)
+    await removeChild(oldUsername)
+  }
+
   userData.email = newEmail
 
   await setUser(newEmail, userData)
   await deleteDoc(doc(db, USER_PATH, currentEmail));
 
-  await updateUserPosts(currentEmail, newEmail)
-  await updateUserLikedPosts(currentEmail, newEmail) 
-
-  // TODO update child username since parent email is used in it 
+  await updateUserPosts(newEmail, cleanEmail)
+  await updateUserLikedPosts(newEmail, cleanEmail) 
 }
