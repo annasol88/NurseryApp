@@ -42,13 +42,13 @@ export async function setAvatar(childUserName, avatarFile) {
   return await getDownloadURL(avatarRef);
 }
 
-export async function setChild(childData) {
+export async function setChild(data) {
   const childRef = doc(db, CHILDREN_PATH, childData.userName);
-  return setDoc(childRef, childData, { merge: true });
+  return setDoc(childRef, data, { merge: true });
 }
 
-export async function removeChild(username) {
-  await deleteDoc(doc(db, CHILDREN_PATH, username));
+export async function removeChild(userName) {
+  return deleteDoc(doc(db, CHILDREN_PATH, userName));
 }
 
 export function newAbsence(date, reason) {
@@ -72,11 +72,11 @@ export async function addActivity(username, activity) {
   if(alreadyRecorded) {
     return Promise.reject({code:'ACTIVITY_ALREADY_RECORDED'})
   } 
-  child.activities.push(activity)
 
+  child.activities.push(activity)
   child.activities = child.activities.sort(function(a,b){
     return new Date(b.date) - new Date(a.date);
   });
-  
+
   return await setChild(child)
 }

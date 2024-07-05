@@ -12,7 +12,7 @@ export default function ChildActivityScreen({navigation}) {
   let {currentUser} = useUserContext()
 
   let [childData, changeChildData] = useState(undefined);
-  let [isLoading, changeLoading] = useState(true);
+  let [isLoading, changeLoading] = useState(false);
   let [error, changeError] = useState(false);
 
   useEffect(() => {
@@ -28,6 +28,7 @@ export default function ChildActivityScreen({navigation}) {
   }, [])
     
   fetchChild = (username) => {
+    changeLoading(true)
     getChild(username).then((d) => {
       changeChildData(d)
     }).catch((e) => {

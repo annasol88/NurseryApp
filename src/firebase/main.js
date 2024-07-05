@@ -15,16 +15,7 @@ export const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig)
 
-// uncomment below for WEB build 
-//
 const auth = initializeAuth(firebaseApp);
-
-// uncomment below for IOS or android
-//
-// const auth = initializeAuth(firebaseApp, {
-//   persistence: getReactNativePersistence(ReactNativeAsyncStorage)
-// });
-
 
 const db = getFirestore(firebaseApp);
 

@@ -26,8 +26,9 @@ export default function Post({postData}) {
       p.likes.push(currentUser.email)
     }
 
-    updatePost(postData.id, p).then().catch(e => {console.error(e)})
-    EventRegister.emit('postUpdated', p)
+    updatePost(postData.id, p)
+    .then(() => EventRegister.emit('postUpdated', p))
+    .catch(e => {console.error(e)})
   }
 
   commentsClicked = () => {

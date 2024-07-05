@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { FlatList, Text, View, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
+import { FlatList, Text, View, Pressable, ActivityIndicator } from 'react-native';
 import { EventRegister } from 'react-native-event-listeners'
 
 import Post from '../../components/post.component';
@@ -17,9 +17,9 @@ export default function NewsFeedScreen({navigation}) {
 
   useEffect(() => {
     loadPosts()
-    // listeners only update posts in memory to avoid excessive API fetching on every change
-    let updatePostListener = EventRegister.addEventListener('postUpdated', updatePosts)
-    let newPostListener = EventRegister.addEventListener('postCreated', addNewPost)
+    // listeners only update posts when changed
+    let updatePostListener = EventRegister.addEventListener('postUpdated', loadPosts)
+    let newPostListener = EventRegister.addEventListener('postCreated', loadPosts)
     return () => {
       EventRegister.removeEventListener(updatePostListener)
       EventRegister.removeEventListener(newPostListener)
@@ -38,21 +38,6 @@ export default function NewsFeedScreen({navigation}) {
       changeError(true)
     }).finally(() => {
       changeLoading(false)
-    })
-  }
-
-  updatePosts = (updatedPost) => {
-    changePosts(prev => {
-      return prev.map(p => {
-        if(p.id === updatedPost.id) {return updatedPost}
-        return p
-      });
-    })
-  }
-
-  addNewPost = (newPost) => {
-    changePosts(prev => {
-      return [newPost, ...prev]
     })
   }
 

@@ -21,15 +21,15 @@ export default function NewPostScreen({navigation}) {
 
     changeLoading(true)
 
-    // TODO - store user profile pictures
-    let post = newPost(text, [], currentUser.email, 'https://avataaars.io/?avatarStyle=Circle')
+    // currently user profile picture is hrd coded because it is not stored
+    let post = newPost(text, [], currentUser.email, 'https://firebasestorage.googleapis.com/v0/b/nurseryapp-anna.appspot.com/o/avatars%2Fuser%2Fadmin%40nursery.com.JPG?alt=media&token=82e4776e-0f05-4011-b18c-4395445aceef')
     createPost(post).then(() => {
       EventRegister.emit('postCreated', post)
       navigation.navigate('News Feed')
     }).catch(e => {
       console.error(e)
       changeError(true)
-    }).finally(() => changeLoading(fkase))
+    }).finally(() => changeLoading(false))
   }
 
   validateText = () => {
