@@ -42,7 +42,7 @@ export default function ChangePasswordScreen() {
 
     } catch(e) {
       // handle errors from firebase auth for invalid email change
-      switch(error.code) {
+      switch(e.code) {
         // firebase throws differend error codes on change email/change password/login - all are accounted to be safe 
         case 'auth/invalid-credential':
         case 'auth/wrong-password':

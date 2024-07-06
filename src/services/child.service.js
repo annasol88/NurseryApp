@@ -20,7 +20,7 @@ export function generateUserName(parentEmail, name) {
 }
 
 // all data uploads are created through calling newChild to ensure consistent data mappings
-export function newChild(username, name, avatarUrl, dob, address, allergies, diet, doctor) {
+export function newChild(username, name, avatarUrl, dob, address, allergies, diet, doctor, activities) {
   return {
     userName: username,
     name: name,
@@ -30,7 +30,7 @@ export function newChild(username, name, avatarUrl, dob, address, allergies, die
     allergies: allergies,
     diet: diet,
     doctor: doctor,
-    activities: []
+    activities: activities
   }
 }
 
@@ -43,7 +43,7 @@ export async function setAvatar(childUserName, avatarFile) {
 }
 
 export async function setChild(data) {
-  const childRef = doc(db, CHILDREN_PATH, childData.userName);
+  const childRef = doc(db, CHILDREN_PATH, data.userName);
   return setDoc(childRef, data, { merge: true });
 }
 

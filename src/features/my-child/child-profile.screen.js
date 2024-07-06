@@ -89,7 +89,7 @@ export default function ChildProfileScreen({route, navigation}) {
     let dobToSave = dobChange ? dob.toDateString() : dob
 
     // child to save
-    childData = newChild(usernameToSave, childName, avatarUrlToSave, dobToSave, address, allergies, diet, doctor)
+    childData = newChild(usernameToSave, childName, avatarUrlToSave, dobToSave, address, allergies, diet, doctor, child.activities)
     await setChild(childData)
 
     if(nameChange) {
@@ -105,7 +105,7 @@ export default function ChildProfileScreen({route, navigation}) {
   uploadNewChild = async () => {
     let childUserName = generateUserName(currentUser.email, childName)
     let storedAvatarUrl = avatarUrl ? await setAvatar(childUserName, avatarUrl) : ''
-    let childData = newChild(childUserName, childName, storedAvatarUrl, dob.toDateString(), address, allergies, diet, doctor)
+    let childData = newChild(childUserName, childName, storedAvatarUrl, dob.toDateString(), address, allergies, diet, doctor, [])
 
     let setChildComplete = setChild(childData)
     let updateUserComplete = setUser(currentUser.email, { child: childUserName })

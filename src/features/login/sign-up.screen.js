@@ -36,7 +36,7 @@ export default function SignUpScreen({navigation}) {
         case 'auth/weak-password': 
           changePasswordInvalid('Password must be at least 6 characters long.')
           break;
-        case 'email-already-in-use':
+        case 'auth/email-already-in-use':
           changeEmailInvalid('An account with this email already exists.')
           break;
         default: 

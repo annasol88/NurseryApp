@@ -35,15 +35,15 @@ export default function Activity({activityData}) {
         <View style={styles.content}>
             <Text style={[styles.contentText, styles.contentPresent]}>
               <MaterialCommunityIcons name="keyboard-tab" size={18} />
-              Sign In:{' '}{activityData.signIn}
+              {' '}Sign In:{' '}{activityData.signIn}
             </Text>
             <Text style={[styles.contentText, styles.contentPresent]}>
               <MaterialCommunityIcons name="food-apple-outline" size={18} />
-              Meals:{' '}{activityData.meals}
+              {' '}Meals:{' '}{activityData.meals}
             </Text>
             <Text style={[styles.contentText, styles.contentPresent]}>
               <MaterialCommunityIcons name="keyboard-tab-reverse" size={18} />
-              Sign Out:{' '}{activityData.signOut}
+              {' '}Sign Out:{' '}{activityData.signOut}
             </Text>
         </View>
       </View>
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
 
   content: {
     display: 'flex',
-    gap: 4
+    gap: 12
   },
 
   contentText: {
